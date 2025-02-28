@@ -25,7 +25,8 @@
 
   <h1>Launch Your App</h1>
   <p>Click the button below to open the app or go to the App Store if the app is not installed.</p>
-
+  <h2>Response Preview:</h2>
+  <pre id="responsePreview">Waiting for response...</pre>
   <button id="launchButton">Open App</button>
 
   <script>
@@ -35,7 +36,7 @@
         .then(response => response.json())
         .then(data => {
           // const universalLink = data.universalLink;
-
+          previewElement.textContent ="data received";
           // Step 2: Attempt to open the universal link
           window.location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
 
