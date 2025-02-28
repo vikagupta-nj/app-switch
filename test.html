@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Ink Launcher</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Launch Your App</h1>
+  <p>Click the button below to open the app or go to the App Store if the app is not installed.</p>
+
+  <button id="launchButton">Open App</button>
+
+  <script>
+    document.getElementById('launchButton').addEventListener('click', function() {
+      // Step 1: Fetch the universal link from your server
+      fetch('https://yourserver.com/get-universal-link') // Replace with your server endpoint
+        .then(response => response.json())
+        .then(data => {
+          const universalLink = data.universalLink;
+
+          // Step 2: Attempt to open the universal link
+          window.location.href = universalLink;
+
+          // Step 3: To avoid transient user activation limit, use a fallback strategy.
+          setTimeout(() => {
+            // If the app isn't launched within a short time (iOS restriction), redirect to the App Store
+            window.location.href = 'https://apps.apple.com/app/your-app-id'; // Replace with your App Store link
+          }, 2500); // Delay to allow time for app launch (this may need tweaking)
+        })
+        .catch(error => {
+          console.error('Error fetching universal link:', error);
+          // Fallback to a generic page or App Store link if fetching the link fails
+          window.location.href = 'https://apps.apple.com/app/your-app-id'; // App Store link fallback
+        });
+    });
+  </script>
+
+</body>
+</html>
