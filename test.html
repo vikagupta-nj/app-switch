@@ -27,35 +27,37 @@
   <p>Click the button below to open the app or go to the App Store if the app is not installed.</p>
   <h2>Response Preview:</h2>
   <pre id="responsePreview">Waiting for response...</pre>
-  <button id="launchButton">Open App</button>
+  <button id="userActionLaunch">Open App with user action</button>
+  <button id="backgroundLaunch">Open App without user action</button>
 
   <script>
-    document.getElementById('launchButton').addEventListener('click', function() {
-      // Step 1: Fetch the universal link from your server
-      fetch('https://httpbin.org/delay/5') // Replace with your server endpoint
+    document.getElementById('userActionLaunch').addEventListener('click', function() {
+      fetch('https://httpbin.org/delay/3')
         .then(response => response.json())
         .then(data => {
-          // const universalLink = data.universalLink;
           var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
           document.getElementById('responsePreview').textContent ="data received";
-          // Step 2: Attempt to open the universal link
+          window.location.href = ul;
+        })
+        .catch(error => {
+          console.error('Error fetching universal link:', error);
+        });
+    });
+
+    document.getElementById('backgroundLaunch').addEventListener('click', function() {
+      fetch('https://httpbin.org/delay/3')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('responsePreview').textContent ="Timer started";
           //window.location.href = ul;
-
-          // Step 3: To avoid transient user activation limit, use a fallback strategy.
-          //setTimeout(() => {
-            // If the app isn't launched within a short time (iOS restriction), redirect to the App Store
-            //window.location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk'; // Replace with your App Store link
-          //}, 2500); // Delay to allow time for app launch (this may need tweaking)
-
           setTimeout(() => {
-            document.getElementById('responsePreview').textContent ="non user initiated delay";
+            document.getElementById('responsePreview').textContent ="launching UL";
+            var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
             window.location.href = ul; // TUA likely expired!
           }, 3000); // 3-second delay - TUA likely expires
         })
         .catch(error => {
           console.error('Error fetching universal link:', error);
-          // Fallback to a generic page or App Store link if fetching the link fails
-          //window.location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk'; // App Store link fallback
         });
     });
   </script>
