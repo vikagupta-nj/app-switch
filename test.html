@@ -36,15 +36,21 @@
         .then(response => response.json())
         .then(data => {
           // const universalLink = data.universalLink;
+          var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
           document.getElementById('responsePreview').textContent ="data received";
           // Step 2: Attempt to open the universal link
-          window.location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
+          //window.location.href = ul;
 
           // Step 3: To avoid transient user activation limit, use a fallback strategy.
           //setTimeout(() => {
             // If the app isn't launched within a short time (iOS restriction), redirect to the App Store
             //window.location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk'; // Replace with your App Store link
           //}, 2500); // Delay to allow time for app launch (this may need tweaking)
+
+          setTimeout(() => {
+            document.getElementById('responsePreview').textContent ="non user initiated delay";
+            window.location.href = ul; // TUA likely expired!
+          }, 3000); // 3-second delay - TUA likely expires
         })
         .catch(error => {
           console.error('Error fetching universal link:', error);
