@@ -1,63 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Universal Ink Launcher</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-    }
-    button {
-      padding: 15px 30px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      background-color: #007bff;
-      color: white;
-      border-radius: 5px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Ink Launcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+        #delayInput {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100px;
+        }
+    </style>
 </head>
 <body>
 
-  <h1>Launch Your App</h1>
-  <h2>Response Preview:</h2>
-  <pre id="responsePreview">Waiting for response...</pre>
-  <button id="userActionLaunch">Open App with user action</button>
-  <button id="backgroundLaunch">Open App without user action</button>
+<h1>Launch Your App</h1>
 
-  
-  <script>
+<label for="delayInput">Delay (milliseconds):</label>
+<input type="number" id="delayInput" value="3000" min="0">
+
+<h2>Response Preview:</h2>
+<pre id="responsePreview">Waiting for response...</pre>
+<button id="userActionLaunch">Open App with user action</button>
+<button id="backgroundLaunch">Open App with Dynamic Delay</button>
+
+
+<script>
     document.getElementById('userActionLaunch').addEventListener('click', function() {
-      fetch('https://httpbin.org/delay/3')
-        .then(response => {
-          document.getElementById('responsePreview').textContent ="data received: ";
-          var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
-          window.location.href = ul;
-        })
-        .catch(error => {
-          console.error('Error fetching universal link:', error);
-        });
+        const fetchDelay = parseInt(document.getElementById('delayInput').value, 10)/1000;
+        if (isNaN(fetchDelay) || fetchDelay < 0) {
+            alert('Please enter a valid positive number for the delay.');
+            return;
+        }
+        fetch(`https://httpbin.org/delay/${fetchDelay}`)
+            .then(response => {
+                document.getElementById('responsePreview').textContent = "data received: ";
+                var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
+                window.location.href = ul;
+            })
+            .catch(error => {
+                console.error('Error fetching universal link:', error);
+            });
     });
 
     document.getElementById('backgroundLaunch').addEventListener('click', function() {
-      fetch('https://httpbin.org/delay/3')
-        .then(response => {
-          document.getElementById('responsePreview').textContent ="Timer started";
-          setTimeout(() => {
-            document.getElementById('responsePreview').textContent ="data received: ";
-            var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
-            window.location.href = ul; // TUA likely expired!
-          }, 3000); // 3-second delay - TUA likely expires
-        })
-        .catch(error => {
-          console.error('Error fetching universal link:', error);
-        });
+        const fetchDelay = parseInt(document.getElementById('delayInput').value, 10)/1000;
+        if (isNaN(fetchDelay) || fetchDelay < 0) {
+            alert('Please enter a valid positive number for the delay.');
+            return;
+        }
+        fetch(`https://httpbin.org/delay/${fetchDelay}`)
+            .then(response => {
+                document.getElementById('responsePreview').textContent = "Timer started";
+                const delay = parseInt(document.getElementById('delayInput').value, 10);
+                setTimeout(() => {
+                    document.getElementById('responsePreview').textContent = "data received: ";
+                    var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
+                    window.location.href = ul;
+                }, delay);
+            })
+            .catch(error => {
+                console.error('Error fetching universal link:', error);
+            });
     });
-  </script>
+</script>
 
 </body>
 </html>
