@@ -24,19 +24,18 @@
 <body>
 
   <h1>Launch Your App</h1>
-  <p>Click the button below to open the app or go to the App Store if the app is not installed.</p>
   <h2>Response Preview:</h2>
   <pre id="responsePreview">Waiting for response...</pre>
   <button id="userActionLaunch">Open App with user action</button>
   <button id="backgroundLaunch">Open App without user action</button>
 
+  
   <script>
     document.getElementById('userActionLaunch').addEventListener('click', function() {
       fetch('https://httpbin.org/delay/3')
-        .then(response => response.json())
-        .then(data => {
+        .then(response => {
+          document.getElementById('responsePreview').textContent ="data received: " + response.headers.get('X-Amzn-Trace-Id');
           var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
-          document.getElementById('responsePreview').textContent ="data received";
           window.location.href = ul;
         })
         .catch(error => {
@@ -46,12 +45,10 @@
 
     document.getElementById('backgroundLaunch').addEventListener('click', function() {
       fetch('https://httpbin.org/delay/3')
-        .then(response => response.json())
-        .then(data => {
+        .then(response => {
           document.getElementById('responsePreview').textContent ="Timer started";
-          //window.location.href = ul;
           setTimeout(() => {
-            document.getElementById('responsePreview').textContent ="launching UL";
+            document.getElementById('responsePreview').textContent ="data received: " + response.headers.get('X-Amzn-Trace-Id');
             var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
             window.location.href = ul; // TUA likely expired!
           }, 3000); // 3-second delay - TUA likely expires
