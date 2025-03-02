@@ -96,11 +96,15 @@
             .then(response => {
                 const endTime = performance.now();
                 const rtt = endTime - startTime;
-                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Status: ${response.status})`;
+                const debugId = response.headers.get('paypal-debug-id');
+                const debugIdText = debugId ? `Debug ID: ${debugId}` : 'Debug ID: Not found';
+                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Status: ${response.status}), ${debugIdText}`;
             })
             .catch(error => {
                 const rtt = performance.now() - startTime;
-                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Network Error)`;
+                const debugId = response.headers.get('paypal-debug-id');
+                const debugIdText = debugId ? `Debug ID: ${debugId}` : 'Debug ID: Not found';
+                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Status: ${response.status}), ${debugIdText} (Network Error)`;
                 console.error('Error fetching data:', error);
             });
     });
