@@ -18,6 +18,7 @@
             background-color: #007bff;
             color: white;
             border-radius: 5px;
+            margin-bottom: 10px;
         }
         #delayInput {
             padding: 10px;
@@ -40,6 +41,10 @@
 <pre id="responsePreview">Waiting for response...</pre>
 <button id="userActionLaunch">Open App with user action</button>
 <button id="backgroundLaunch">Open App with Dynamic Delay</button>
+<button id="measureRtt">Measure RTT</button>
+
+<h2>RTT Results:</h2>
+<pre id="rttResults">RTT will be displayed here.</pre>
 
 
 <script>
@@ -70,6 +75,10 @@
             .then(response => {
                 document.getElementById('responsePreview').textContent = "Timer started";
                 const delay = parseInt(document.getElementById('delayInput').value, 10);
+                if (isNaN(delay) || delay < 0) {
+                    alert('Please enter a valid positive number for the delay.');
+                    return;
+                }
                 setTimeout(() => {
                     document.getElementById('responsePreview').textContent = "data received: ";
                     var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
@@ -78,6 +87,27 @@
             })
             .catch(error => {
                 console.error('Error fetching universal link:', error);
+            });
+    });
+
+    document.getElementById('measureRtt').addEventListener('click', function() {
+        const fetchDelay = parseInt(document.getElementById('delayInput').value, 10)/1000;
+        if (isNaN(fetchDelay) || fetchDelay < 0) {
+            alert('Please enter a valid positive number for the delay.');
+            return;
+        }
+        const startTime = performance.now();
+
+        fetch(`https://httpbin.org/delay/${fetchDelay}`)
+            .then(response => {
+                const endTime = performance.now();
+                const rtt = endTime - startTime;
+                document.getElementById('rttResults').textContent = `RTT: ${rtt.toFixed(2)} ms`;
+                return response.text();
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                document.getElementById('rttResults').textContent = 'Error fetching data.';
             });
     });
 </script>
