@@ -102,7 +102,7 @@
             })
             .catch(error => {
                 const rtt = performance.now() - startTime;
-                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Network Error)`;
+                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms`;
                 console.error('Error fetching data:', error);
             });
     });
