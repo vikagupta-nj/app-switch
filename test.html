@@ -41,7 +41,7 @@
 <pre id="responsePreview">Waiting for response...</pre>
 <button id="userActionLaunch">Open App with user action</button>
 <button id="backgroundLaunch">Open App with Dynamic Delay</button>
-<button id="measureRtt">Measure RTT</button>
+<button id="measureRtt">Measure RTT to PayPal</button>
 
 <h2>RTT Results:</h2>
 <pre id="rttResults">RTT will be displayed here.</pre>
@@ -91,23 +91,17 @@
     });
 
     document.getElementById('measureRtt').addEventListener('click', function() {
-        const fetchDelay = parseInt(document.getElementById('delayInput').value, 10)/1000;
-        if (isNaN(fetchDelay) || fetchDelay < 0) {
-            alert('Please enter a valid positive number for the delay.');
-            return;
-        }
         const startTime = performance.now();
-
-        fetch(`https://httpbin.org/delay/${fetchDelay}`)
+        fetch('https://api.paypal.com/', { method: 'HEAD' })
             .then(response => {
                 const endTime = performance.now();
                 const rtt = endTime - startTime;
-                document.getElementById('rttResults').textContent = `RTT: ${rtt.toFixed(2)} ms`;
-                return response.text();
+                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Status: ${response.status})`;
             })
             .catch(error => {
+                const rtt = performance.now() - startTime;
+                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Network Error)`;
                 console.error('Error fetching data:', error);
-                document.getElementById('rttResults').textContent = 'Error fetching data.';
             });
     });
 </script>
