@@ -92,17 +92,21 @@
 
     document.getElementById('measureRtt').addEventListener('click', function() {
         const startTime = performance.now();
-        fetch('https://api.paypal.com/', { method: 'HEAD' })
+        // Cache-busting by adding a random query parameter
+        const cacheBuster = Math.random();
+        fetch(`https://api.paypal.com/?cacheBuster=${cacheBuster}`, { method: 'HEAD', mode: 'no-cors' })
             .then(response => {
                 const endTime = performance.now();
                 const rtt = endTime - startTime;
-                const debugId = response.headers.get('paypal-debug-id');
-                const debugIdText = debugId ? `Debug ID: ${debugId}` : 'Debug ID: Not found';
-                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Status: ${response.status}), ${debugIdText}`;
+                // Because we're using mode: 'no-cors', the response is opaque.
+                // We cannot determine the real status code. It will always be 0.
+                // A status of 0 does NOT mean a network error. It just means we
+                // cannot know the real status due to no-cors.
+                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Status: ${response.status})`;
             })
             .catch(error => {
                 const rtt = performance.now() - startTime;
-                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms`;
+                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Network Error)`;
                 console.error('Error fetching data:', error);
             });
     });
