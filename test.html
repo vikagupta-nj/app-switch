@@ -48,6 +48,7 @@
 <button id="userActionLaunch">Open App with user action</button>
 <button id="backgroundLaunch">Open App with Dynamic Delay</button>
 <button id="measureRtt">Measure RTT to PayPal</button>
+<button id="syncUserActionLaunch">Open App with Sync user action</button>
 
 <h2>RTT Results:</h2>
 <pre id="rttResults">RTT will be displayed here.</pre>
@@ -117,6 +118,35 @@
                 document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Network Error)`;
                 console.error('Error fetching data:', error);
             });
+    });
+
+    // New button: syncUserActionLaunch
+    document.getElementById('syncUserActionLaunch').addEventListener('click', function() {
+        const fetchDelay = parseInt(document.getElementById('delayInput').value, 10) / 1000;
+        if (isNaN(fetchDelay) || fetchDelay < 0) {
+            alert('Please enter a valid positive number for the delay.');
+            return;
+        }
+        document.getElementById('responsePreview').textContent = "Fetching synchronously...";
+
+        // Synchronous fetch (using XMLHttpRequest)
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `https://httpbin.org/delay/${fetchDelay}`, false); // 'false' makes it synchronous
+        try {
+            xhr.send();
+            if (xhr.status >= 200 && xhr.status < 300) {
+                document.getElementById('responsePreview').textContent = "data received: ";
+                var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
+                window.location.href = ul;
+            } else {
+                console.error('Synchronous fetch failed:', xhr.status);
+                document.getElementById('responsePreview').textContent = `Error: ${xhr.status}`;
+            }
+        } catch (error) {
+            console.error("Error during fetch", error);
+             document.getElementById('responsePreview').textContent = `Error: ${error}`;
+        }
+
     });
 
     // Iframe related logic
