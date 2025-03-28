@@ -100,25 +100,35 @@
             alert('Please enter a valid positive number for the delay.');
             return;
         }
-        var perApiDelay = fetchDelay/4;
-        for(var i =0;i<3;i++){
-            fetch(`https://httpbin.org/delay/${perApiDelay}`)
-            .then(response => {
-                document.getElementById('responsePreview').textContent = "data received, api #: " + i ;
-            })
-            .catch(error => {
-                console.error('Error fetching universal link:', error);
-            });
+        const perApiDelay = fetchDelay / 4;
+        const fetchPromises = [];
+        for (let i = 0; i < 3; i++) {
+            const promise = fetch(`https://httpbin.org/delay/${perApiDelay}`)
+                .then(response => {
+                    document.getElementById('responsePreview').textContent = "data received, api #: " + i;
+                })
+                .catch(error => {
+                    console.error('Error fetching universal link:', error);
+                    throw error; // Re-throw the error to stop the chain
+                });
+            fetchPromises.push(promise);
         }
-        fetch(`https://httpbin.org/delay/${perApiDelay}`)
-            .then(response => {
-                document.getElementById('responsePreview').textContent = "UL received: ";
-                var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
-                window.location.href = ul;
-            })
-            .catch(error => {
-                console.error('Error fetching universal link:', error);
-            });
+        // Chain the promises
+        fetchPromises.reduce((promiseChain, currentPromise) => {
+                return promiseChain.then(() => currentPromise);
+        }, Promise.resolve())
+        .then(() => {
+            // This code will run after all loop iterations are done
+            return fetch(`https://httpbin.org/delay/${perApiDelay}`);
+        })
+        .then(response => {
+            document.getElementById('responsePreview').textContent = "UL received: ";
+            var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
+            window.location.href = ul;
+        })
+        .catch(error => {
+            console.error('Error fetching universal link:', error);
+        });
     });
 
     document.getElementById('backgroundLaunch').addEventListener('click', function() {
@@ -184,78 +194,3 @@
             if (xhr.status >= 200 && xhr.status < 300) {
                 document.getElementById('responsePreview').textContent = "data received: ";
                 var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
-                window.location.href = ul;
-            } else {
-                console.error('Synchronous fetch failed:', xhr.status);
-                document.getElementById('responsePreview').textContent = `Error: ${xhr.status}`;
-            }
-        } catch (error) {
-            console.error("Error during fetch", error);
-             document.getElementById('responsePreview').textContent = `Error: ${error}`;
-        }
-
-    });
-
-    // Iframe related logic
-    const iframe = document.getElementById('myIframe');
-    const iframeContent = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Iframe Content</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    text-align: center;
-                }
-                button {
-                    padding: 10px 20px;
-                    font-size: 14px;
-                    cursor: pointer;
-                    border: none;
-                    background-color: #28a745;
-                    color: white;
-                    border-radius: 5px;
-                }
-            </style>
-        </head>
-        <body>
-            <h2>Iframe Content</h2>
-            <button id="iframeLaunch">Launch App from Iframe</button>
-            <script>
-                document.getElementById('iframeLaunch').addEventListener('click', function() {
-                    // Get fetchDelay from the parent
-                    const fetchDelay = parseInt(window.parent.document.getElementById('delayInput').value, 10)/1000;
-                     if (isNaN(fetchDelay) || fetchDelay < 0) {
-                       alert('Please enter a valid positive number for the delay.');
-                        return;
-                     }
-                    fetch(\`https://httpbin.org/delay/\${fetchDelay}\`)
-                        .then(response => {
-                            var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
-                            // Send message to parent
-                            window.parent.postMessage({ action: 'launchApp', url: ul }, '*');
-                        })
-                        .catch(error => {
-                            console.error('Error fetching universal link:', error);
-                        });
-                });
-            <\/script>
-        </body>
-        </html>
-    `;
-
-    iframe.srcdoc = iframeContent;
-
-    // Listen for messages from the iframe
-    window.addEventListener('message', (event) => {
-        if (event.data.action === 'launchApp') {
-            window.location.href = event.data.url;
-        }
-    });
-</script>
-
-</body>
-</html>
