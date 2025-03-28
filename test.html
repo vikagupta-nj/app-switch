@@ -34,6 +34,17 @@
             border: 1px solid #ccc;
             margin-top: 20px;
         }
+        #isActiveLabel {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .active {
+            color: green;
+        }
+        .inactive {
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -42,6 +53,8 @@
 
 <label for="delayInput">Delay (milliseconds):</label>
 <input type="number" id="delayInput" value="3000" min="0">
+
+<div id="isActiveLabel">isActive: <span id="isActiveValue"></span></div>
 
 <h2>Response Preview:</h2>
 <pre id="responsePreview">Waiting for response...</pre>
@@ -56,6 +69,30 @@
 <iframe id="myIframe"></iframe>
 
 <script>
+    // Function to update isActiveLabel
+    function updateIsActiveLabel() {
+        const isActive = navigator.userActivation.isActive;
+        const isActiveValueElement = document.getElementById('isActiveValue');
+        isActiveValueElement.textContent = isActive;
+        // Update the CSS class for styling
+        const isActiveLabel = document.getElementById('isActiveLabel');
+        if (isActive) {
+          isActiveLabel.classList.remove('inactive');
+          isActiveLabel.classList.add('active');
+        } else {
+          isActiveLabel.classList.remove('active');
+          isActiveLabel.classList.add('inactive');
+        }
+    }
+
+    // Update the label initially
+    updateIsActiveLabel();
+
+    // Update the label when a click event occurs
+    document.addEventListener('click', updateIsActiveLabel);
+
+    // Set an interval to update the label regularly (every 100ms)
+    setInterval(updateIsActiveLabel, 100);
     // Existing buttons
     document.getElementById('userActionLaunch').addEventListener('click', function() {
         const fetchDelay = parseInt(document.getElementById('delayInput').value, 10) / 1000;
