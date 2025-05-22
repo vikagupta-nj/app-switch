@@ -7,10 +7,12 @@
 </head>
 <body>
     <p id="status">Loading...</p>
+    <p>Activation status: <span id="tua-status">n/a</span></p>
 
     <script>
         window.addEventListener('load', () => {
             document.querySelector('#status').textContent = 'Opening PayPal app...'
+            document.querySelector('#tua-status').textContent = `hasBeenActive: ${navigator.userActivation.hasBeenActive}, isActive: ${navigator.userActivation.isActive}`
             // Try to trigger the universal link            
             setTimeout(function() {
                 window.location.assign("https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228")
