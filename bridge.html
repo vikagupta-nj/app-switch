@@ -3,15 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting to PayPal...</title>
-    <!-- Meta refresh as primary redirect method -->
-    <meta http-equiv="refresh" content="0; url=https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228">
+    <title>Opening PayPal...</title>
 </head>
 <body>
-    <p>Redirecting to PayPal...</p>
-    <!-- JavaScript as fallback redirect method -->
+    <p>Opening PayPal app...</p>
+    <!-- Hidden link for the universal link -->
+    <a href="https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228" id="universalLink" style="display: none;">Open PayPal</a>
+    
     <script>
-        window.location.href = "https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228";
+        window.onload = function() {
+            // Try to trigger the universal link
+            document.getElementById('universalLink').click();
+            
+            // Fallback after a short delay if the app doesn't open
+            setTimeout(function() {
+                // If we're still here, the app didn't open
+                if (document.visibilityState === 'visible') {
+                    window.location.href = "https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228";
+                }
+            }, 1000);
+        };
     </script>
 </body>
 </html>
