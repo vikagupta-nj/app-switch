@@ -366,23 +366,26 @@
             
             const frame = document.getElementById('testFrame');
             
-            setTimeout(() => {
-                log(`TUA before delayed navigation: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
-                frame.src = 'about:blank';
-                log('Frame navigation initiated', 'nav');
-                
-                frame.onload = () => {
-                    const isActive = navigator.userActivation.isActive;
-                    log(`TUA after navigation: ${isActive ? 'Active' : 'Inactive'}`, 'check');
+            // Simulate API call with Promise
+            Promise.resolve()
+                .then(() => new Promise(resolve => setTimeout(resolve, delayMs)))
+                .then(() => {
+                    log(`TUA before delayed navigation: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
+                    frame.src = 'about:blank';
+                    log('Frame navigation initiated', 'nav');
                     
-                    if (isActive) {
-                        log('Proceeding with app switch', 'success');
-                        window.location.href = UL;
-                    } else {
-                        log('TUA consumed by frame navigation - app switch will fail', 'fail');
-                    }
-                };
-            }, delayMs);
+                    frame.onload = () => {
+                        const isActive = navigator.userActivation.isActive;
+                        log(`TUA after navigation: ${isActive ? 'Active' : 'Inactive'}`, 'check');
+                        
+                        if (isActive) {
+                            log('Proceeding with app switch', 'success');
+                            window.location.href = UL;
+                        } else {
+                            log('TUA consumed by frame navigation - app switch will fail', 'fail');
+                        }
+                    };
+                });
         });
 
         // Update status every 100ms
