@@ -101,15 +101,16 @@
             alert('Please enter a valid positive number for the delay.');
             return;
         }
-        const perApiDelay = fetchDelay / 4;
+        //const perApiDelay = fetchDelay / 4;
         try {
             document.getElementById('responsePreview').textContent = "Starting fetches...";
-            for (let i = 0; i < 4; i++) {
-              document.getElementById('responsePreview').textContent = "fetch number: " + i;
+            //for (let i = 0; i < 4; i++) {
+              //document.getElementById('responsePreview').textContent = "fetch number: " + i;
               // No need to await since we ignore the response
-              await fetch(`https://httpbin.org/delay/${perApiDelay}`);
-              document.getElementById('responsePreview').textContent = "fetch number: " + i + " finished";
-            }
+              //await fetch(`https://httpbin.org/delay/${perApiDelay}`);
+              //document.getElementById('responsePreview').textContent = "fetch number: " + i + " finished";
+            //}
+            await fetch(`https://httpbin.org/delay/${fetchDelay}`);
             document.getElementById('responsePreview').textContent = "All fetches finished. Opening the app...";
             var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
             window.location.href = ul;
