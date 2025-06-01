@@ -337,7 +337,7 @@
         // Direct app switch - simple test
         document.getElementById('directSwitch').addEventListener('click', () => {
             log('Direct app switch initiated', 'start');
-            while(navigator.userActivation.isActive) {
+            while(navigator.userActivation.isActive && navigator.userActivation.hasBeenActive) {
                 log('TUA is active, waiting for it to expire', 'check');
             }
             window.location.href = UL;
