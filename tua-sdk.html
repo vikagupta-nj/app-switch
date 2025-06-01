@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPal Flow Transient Activation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #0070ba;
+            color: white;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        .iframe-container {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        .test-iframe {
+            width: 300px;
+            height: 200px;
+            border: 1px solid #ccc;
+        }
+        #activationStatus {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        #log {
+            text-align: left;
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-width: 800px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <h1>PayPal Flow Transient Activation Test</h1>
+    
+    <div id="activationStatus">Checking activation status...</div>
+    <div id="log"></div>
+
+    <button id="startTest">Start PayPal Flow Test</button>
+
+    <div class="iframe-container">
+        <iframe id="buttonFrame" class="test-iframe"></iframe>
+        <iframe id="checkoutFrame" class="test-iframe"></iframe>
+    </div>
+
+    <script>
+        // Utility function to update activation status
+        function updateActivationStatus() {
+            const isActive = navigator.userActivation.isActive;
+            const status = document.getElementById('activationStatus');
+            status.textContent = `Transient Activation: ${isActive ? 'ACTIVE' : 'INACTIVE'}`;
+            status.className = isActive ? 'active' : 'inactive';
+        }
+
+        // Utility function to log events with timestamps
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString([], { hour12: false, fractionalSecondDigits: 3 });
+            logDiv.innerHTML += `${time}: ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Update activation status periodically
+        setInterval(updateActivationStatus, 100);
+
+        // PayPal Flow Test
+        document.getElementById('startTest').addEventListener('click', function() {
+            const buttonFrame = document.getElementById('buttonFrame');
+            const checkoutFrame = document.getElementById('checkoutFrame');
+            
+            // Monitor activation state
+            function checkActivation(step) {
+                const isActive = navigator.userActivation.isActive;
+                log(`Step ${step}: Transient activation ${isActive ? 'ACTIVE' : 'INACTIVE'}`);
+                return isActive;
+            }
+
+            // Clear previous logs
+            document.getElementById('log').innerHTML = '';
+            log('Starting PayPal flow test...');
+            
+            // Monitor buttonFrame navigation events
+            buttonFrame.addEventListener('load', () => {
+                log('Button frame loaded');
+                checkActivation('1b');
+            });
+
+            // Step 1: Load initial button frame
+            checkActivation('1a');
+            buttonFrame.src = 'https://www.paypal.com/smart/buttons';
+            
+            buttonFrame.onload = () => {
+                log('Button frame loaded, preparing checkout...');
+                checkActivation('2a');
+                
+                // Step 2: Load checkout frame after a short delay
+                requestAnimationFrame(() => {
+                    checkActivation('2b');
+                    checkoutFrame.src = 'https://www.paypal.com/checkout/';
+                    
+                    // Monitor checkoutFrame navigation events
+                    checkoutFrame.addEventListener('load', () => {
+                        log('Checkout frame loaded');
+                        checkActivation('2c');
+                    });
+                    
+                    checkoutFrame.onload = () => {
+                        log('Checkout frame ready, preparing app switch...');
+                        checkActivation('3a');
+                        
+                        // Step 3: Try app switch after ensuring all navigations are complete
+                        requestAnimationFrame(() => {
+                            const finalCheck = checkActivation('3b');
+                            log(`Final attempt: App switch will ${finalCheck ? 'SUCCEED' : 'FAIL'}`);
+                            window.location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N';
+                        });
+                    };
+                });
+            };
+        });
+    </script>
+</body>
+</html>
