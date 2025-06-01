@@ -12,11 +12,17 @@
         button {
             padding: 10px 20px;
             margin: 10px;
+            min-width: 200px;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         #status {
             margin: 20px 0;
             padding: 10px;
             border-radius: 4px;
+            font-size: 16px;
         }
         .active {
             background: #d4edda;
@@ -30,9 +36,12 @@
             border: 1px solid #ccc;
             padding: 10px;
             margin: 20px 0;
-            height: 200px;
+            height: 300px;
             overflow-y: auto;
             font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.5;
         }
         iframe {
             width: 100%;
@@ -40,78 +49,209 @@
             border: 1px solid #ccc;
             margin: 10px 0;
         }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+        .test-section h3 {
+            margin-top: 0;
+        }
+        .separator {
+            border-top: 2px dashed #ccc;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
     <h1>Transient User Activation Test</h1>
     <div id="status">Checking activation status...</div>
-    <div>
+    
+    <div class="test-section">
+        <h3>Test 1: Direct App Switch (Control)</h3>
+        <p>Shows normal behavior - immediate app switch after click</p>
         <button id="directSwitch">Direct App Switch</button>
-        <button id="iframeSwitch">App Switch after Iframe Redirect</button>
     </div>
+
+    <div class="test-section">
+        <h3>Test 2: Frame Navigation TUA Consumption</h3>
+        <p>Demonstrates how frame navigation affects TUA</p>
+        <button id="singleNavigation">Single Navigation Test (2s delay)</button>
+        <button id="delayedNavigation">Navigation with 3s Delay</button>
+    </div>
+
     <iframe id="testFrame"></iframe>
     <div id="log"></div>
 
     <script>
-        function log(message) {
+        let startTime = 0;
+        let activationCheckInterval;
+        const buttons = document.querySelectorAll('button');
+
+        function disableAllButtons() {
+            buttons.forEach(btn => btn.disabled = true);
+        }
+
+        function enableAllButtons() {
+            buttons.forEach(btn => btn.disabled = false);
+        }
+
+        function getTimeSinceActivation() {
+            return startTime ? ((performance.now() - startTime) / 1000).toFixed(2) : 'N/A';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function log(message, type = 'info') {
             const logDiv = document.getElementById('log');
-            const time = new Date().toLocaleTimeString();
-            logDiv.innerHTML += `${time}: ${message}<br>`;
+            const time = getTimeSinceActivation().padStart(6, ' ');
+            let prefix = '';
+            
+            switch(type) {
+                case 'start': prefix = '🟢'; break;
+                case 'nav': prefix = '🔄'; break;
+                case 'check': prefix = '👉'; break;
+                case 'success': prefix = '✅'; break;
+                case 'fail': prefix = '❌'; break;
+                case 'end': prefix = '🔚'; break;
+                default: prefix = '  ';
+            }
+            
+            logDiv.innerHTML += `[${time}s] ${prefix} ${message}\n`;
             logDiv.scrollTop = logDiv.scrollHeight;
+            
+            // Add separator after test completion
+            if (type === 'end') {
+                logDiv.innerHTML += `${'='.repeat(50)}\n`;
+            }
         }
 
         function updateStatus() {
             const status = document.getElementById('status');
             const isActive = navigator.userActivation.isActive;
-            status.textContent = `Transient Activation: ${isActive ? 'ACTIVE' : 'INACTIVE'}`;
+            const hasBeenActive = navigator.userActivation.hasBeenActive;
+            status.textContent = `Current Status:  ${isActive ? '✅ ACTIVE' : '❌ INACTIVE'}  |  Has been active: ${hasBeenActive ? 'Yes' : 'No'}`;
             status.className = isActive ? 'active' : 'inactive';
         }
 
-        // Update status every 100ms
-        setInterval(updateStatus, 100);
-
-        // Direct app switch - should work
-        document.getElementById('directSwitch').addEventListener('click', () => {
-            log('Direct app switch attempt');
-            const isActive = navigator.userActivation.isActive;
-            log(`Activation status: ${isActive ? 'ACTIVE' : 'INACTIVE'}`);
-            if (isActive) {
-                log('Attempting app switch...');
-                location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
-            } else {
-                log('Cannot app switch - no activation');
+        function startActivationTracking() {
+            startTime = performance.now();
+            if (activationCheckInterval) {
+                clearInterval(activationCheckInterval);
             }
+            activationCheckInterval = setInterval(() => {
+                const isActive = navigator.userActivation.isActive;
+                if (!isActive && startTime) {
+                    log('TUA expired or consumed', 'fail');
+                    clearInterval(activationCheckInterval);
+                    startTime = 0;
+                    enableAllButtons();
+                }
+            }, 100);
+        }
+
+        function stopActivationTracking() {
+            if (activationCheckInterval) {
+                clearInterval(activationCheckInterval);
+                activationCheckInterval = null;
+            }
+        }
+
+        async function tryAppSwitch() {
+            const isActive = navigator.userActivation.isActive;
+            log(`Checking if app switch possible...`, 'check');
+            await sleep(500);
+            
+            if (isActive) {
+                log(`TUA is active, proceeding with app switch`, 'success');
+                await sleep(500);
+                stopActivationTracking(); // Stop tracking before navigation
+                location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N';
+            } else {
+                log(`Cannot app switch - TUA not active`, 'fail');
+                enableAllButtons();
+            }
+        }
+
+        // Direct app switch - control test
+        document.getElementById('directSwitch').addEventListener('click', async () => {
+            disableAllButtons();
+            log('Starting direct app switch test', 'start');
+            startActivationTracking();
+            await sleep(500);
+            tryAppSwitch();
         });
 
-        // App switch after iframe redirect - should fail
-        document.getElementById('iframeSwitch').addEventListener('click', () => {
-            log('Starting iframe redirect test');
-            const isActive = navigator.userActivation.isActive;
-            log(`Initial activation status: ${isActive ? 'ACTIVE' : 'INACTIVE'}`);
+        // Single navigation test with 2s delay
+        document.getElementById('singleNavigation').addEventListener('click', async () => {
+            disableAllButtons();
+            log('Starting single navigation test', 'start');
+            startActivationTracking();
             
             const frame = document.getElementById('testFrame');
-            frame.src = 'about:blank';
             
-            // After iframe loads, redirect it
-            frame.onload = () => {
-                log('Iframe loaded, redirecting...');
-                frame.src = 'about:blank?redirect=1';
+            // First check
+            log(`Initial TUA check: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
+            await sleep(1000);
+            
+            // Start navigation
+            log('Starting frame navigation', 'nav');
+            frame.src = 'about:blank?t=' + Date.now();
+            
+            frame.onload = async () => {
+                log('Frame navigation complete', 'nav');
+                await sleep(500);
                 
-                // After redirect, try app switch
-                frame.onload = () => {
-                    log('Iframe redirected');
-                    const isStillActive = navigator.userActivation.isActive;
-                    log(`Activation status after redirect: ${isStillActive ? 'ACTIVE' : 'INACTIVE'}`);
-                    
-                    if (isStillActive) {
-                        log('Attempting app switch...');
-                        location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
-                    } else {
-                        log('Cannot app switch - activation consumed by iframe redirect');
-                    }
-                };
+                const isActive = navigator.userActivation.isActive;
+                log(`TUA after navigation: ${isActive ? 'Active' : 'Inactive'}`, 'check');
+                await sleep(500);
+                
+                tryAppSwitch();
             };
         });
+
+        // Navigation with 3s delay
+        document.getElementById('delayedNavigation').addEventListener('click', async () => {
+            disableAllButtons();
+            log('Starting delayed navigation test', 'start');
+            startActivationTracking();
+            
+            const frame = document.getElementById('testFrame');
+            
+            // Initial check
+            log(`Initial TUA check: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
+            await sleep(1000);
+            
+            // Wait 3 seconds
+            log('Waiting 3 seconds before navigation...', 'info');
+            await sleep(3000);
+            
+            // Check before navigation
+            log(`TUA before navigation: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
+            await sleep(500);
+            
+            // Start navigation
+            log('Starting frame navigation', 'nav');
+            frame.src = 'about:blank?t=' + Date.now();
+            
+            frame.onload = async () => {
+                log('Frame navigation complete', 'nav');
+                await sleep(500);
+                
+                const isActive = navigator.userActivation.isActive;
+                log(`TUA after navigation: ${isActive ? 'Active' : 'Inactive'}`, 'check');
+                await sleep(500);
+                
+                tryAppSwitch();
+            };
+        });
+
+        // Update status every 100ms
+        setInterval(updateStatus, 100);
     </script>
 </body>
 </html>
