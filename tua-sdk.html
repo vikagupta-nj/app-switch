@@ -2,62 +2,178 @@
 <html>
 <head>
     <title>Transient User Activation Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 16px;
             max-width: 800px;
             margin: 0 auto;
+            line-height: 1.5;
+            font-size: 16px;
         }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            word-wrap: break-word;
+        }
+
         button {
-            padding: 10px 20px;
-            margin: 10px;
-            min-width: 200px;
+            padding: 12px 20px;
+            margin: 8px 0;
+            width: 100%;
+            max-width: 300px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
+
         #status {
-            margin: 20px 0;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 16px;
+            margin: 16px 0;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            word-wrap: break-word;
         }
+
         .active {
             background: #d4edda;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
+
         .inactive {
             background: #f8d7da;
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
+
         #log {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 20px 0;
-            height: 300px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 16px 0;
+            height: 200px;
             overflow-y: auto;
-            font-family: monospace;
-            white-space: pre-wrap;
-            font-size: 14px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 13px;
             line-height: 1.5;
+            background: #f8f9fa;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
+
         iframe {
             width: 100%;
-            height: 100px;
-            border: 1px solid #ccc;
-            margin: 10px 0;
+            height: 80px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 8px 0;
         }
+
         .test-section {
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: #f8f9fa;
+            margin: 16px 0;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+
         .test-section h3 {
-            margin-top: 0;
+            margin: 0 0 8px 0;
+            font-size: 18px;
+        }
+
+        .test-section p {
+            margin: 8px 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .delay-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .delay-input input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .delay-input label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            button {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+
+            #status {
+                font-size: 13px;
+                padding: 10px;
+            }
+
+            #log {
+                font-size: 12px;
+                height: 160px;
+            }
+
+            .test-section {
+                padding: 12px;
+            }
+
+            .test-section h3 {
+                font-size: 16px;
+            }
+
+            .test-section p {
+                font-size: 13px;
+            }
+
+            .delay-input {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .delay-input input {
+                width: 120px;
+            }
         }
     </style>
 </head>
@@ -74,8 +190,12 @@
     <div class="test-section">
         <h3>Test 2: Frame Navigation TUA Consumption</h3>
         <p>Demonstrates how frame navigation affects TUA</p>
-        <button id="singleNavigation">Single Navigation Test (2s delay)</button>
-        <button id="delayedNavigation">Navigation with 3s Delay</button>
+        <button id="singleNavigation">Single Navigation Test (immediate)</button>
+        <div class="delay-input">
+            <label for="delayTime">Delay (milliseconds):</label>
+            <input type="number" id="delayTime" value="1000" min="0" step="100">
+        </div>
+        <button id="delayedNavigation">Navigation with Delay</button>
     </div>
 
     <iframe id="testFrame"></iframe>
@@ -220,35 +340,31 @@
             window.location.href = UL;
         });
 
-        // Frame navigation test
+        // Frame navigation test - immediate (should succeed)
         document.getElementById('singleNavigation').addEventListener('click', () => {
-            log('Frame navigation test started', 'start');
+            log('Immediate frame navigation test started', 'start');
             log(`Initial TUA state: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
             
             const frame = document.getElementById('testFrame');
+            
+            // Queue both the navigation and app switch immediately
             frame.src = 'about:blank';
             log('Frame navigation initiated', 'nav');
             
-            frame.onload = () => {
-                const isActive = navigator.userActivation.isActive;
-                log(`TUA after navigation: ${isActive ? 'Active' : 'Inactive'}`, 'check');
-                
-                if (isActive) {
-                    log('Proceeding with app switch', 'success');
-                    window.location.href = UL;
-                } else {
-                    log('TUA consumed by frame navigation', 'fail');
-                }
-            };
+            // Attempt app switch right away
+            log('Attempting immediate app switch', 'check');
+            window.location.href = UL;
         });
 
-        // Navigation with delay test
+        // Navigation with delay test (should fail)
         document.getElementById('delayedNavigation').addEventListener('click', () => {
+            const delayMs = parseInt(document.getElementById('delayTime').value) || 1000;
+            
             log('Delayed navigation test started', 'start');
             log(`Initial TUA state: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
+            log(`Using delay of ${delayMs}ms`, 'info');
             
             const frame = document.getElementById('testFrame');
-            log('Waiting 3 seconds before navigation...', 'info');
             
             setTimeout(() => {
                 log(`TUA before delayed navigation: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
@@ -263,10 +379,10 @@
                         log('Proceeding with app switch', 'success');
                         window.location.href = UL;
                     } else {
-                        log('TUA consumed by frame navigation', 'fail');
+                        log('TUA consumed by frame navigation - app switch will fail', 'fail');
                     }
                 };
-            }, 3000);
+            }, delayMs);
         });
 
         // Update status every 100ms
