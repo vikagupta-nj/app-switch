@@ -109,44 +109,47 @@
             document.getElementById('log').innerHTML = '';
             log('Starting PayPal flow test...');
             
-            // Monitor buttonFrame navigation events
+            // Step 1: Load initial button frame
+            checkActivation('1a');
+            buttonFrame.src = 'about:blank';
+            buttonFrame.onload = function() {
+                buttonFrame.contentDocument.write('<button onclick="window.parent.postMessage(\'button_clicked\',\'*\');setTimeout(function(){location.href=\'about:blank?step=button_redirect\'},100)">Pay with PayPal</button>');
+                buttonFrame.contentDocument.close();
+            };
+            
+            // Listen for messages from frames
+            window.addEventListener('message', function(event) {
+                log(`Received message: ${event.data}`);
+                if (event.data === 'button_clicked') {
+                    checkActivation('2a');
+                    // Load checkout frame after button click
+                    checkoutFrame.src = 'about:blank';
+                    checkoutFrame.onload = function() {
+                        checkoutFrame.contentDocument.write('<div style="border:1px solid #ccc;padding:20px"><h3>PayPal Checkout</h3></div><script>setTimeout(function(){window.parent.postMessage("checkout_loaded","*");location.href="about:blank?step=checkout_redirect"},200)<\/script>');
+                        checkoutFrame.contentDocument.close();
+                    };
+                }
+                if (event.data === 'checkout_loaded') {
+                    checkActivation('3a');
+                    // Try app switch after checkout frame loads and redirects
+                    requestAnimationFrame(() => {
+                        const finalCheck = checkActivation('3b');
+                        log(`Final attempt: App switch will ${finalCheck ? 'SUCCEED' : 'FAIL'}`);
+                        window.location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N';
+                    });
+                }
+            });
+
+            // Monitor frame loads
             buttonFrame.addEventListener('load', () => {
                 log('Button frame loaded');
                 checkActivation('1b');
             });
 
-            // Step 1: Load initial button frame
-            checkActivation('1a');
-            buttonFrame.src = 'https://www.paypal.com/smart/buttons';
-            
-            buttonFrame.onload = () => {
-                log('Button frame loaded, preparing checkout...');
-                checkActivation('2a');
-                
-                // Step 2: Load checkout frame after a short delay
-                requestAnimationFrame(() => {
-                    checkActivation('2b');
-                    checkoutFrame.src = 'https://www.paypal.com/checkout/';
-                    
-                    // Monitor checkoutFrame navigation events
-                    checkoutFrame.addEventListener('load', () => {
-                        log('Checkout frame loaded');
-                        checkActivation('2c');
-                    });
-                    
-                    checkoutFrame.onload = () => {
-                        log('Checkout frame ready, preparing app switch...');
-                        checkActivation('3a');
-                        
-                        // Step 3: Try app switch after ensuring all navigations are complete
-                        requestAnimationFrame(() => {
-                            const finalCheck = checkActivation('3b');
-                            log(`Final attempt: App switch will ${finalCheck ? 'SUCCEED' : 'FAIL'}`);
-                            window.location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N';
-                        });
-                    };
-                });
-            };
+            checkoutFrame.addEventListener('load', () => {
+                log('Checkout frame loaded');
+                checkActivation('2b');
+            });
         });
     </script>
 </body>
