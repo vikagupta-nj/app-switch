@@ -59,10 +59,6 @@
         .test-section h3 {
             margin-top: 0;
         }
-        .separator {
-            border-top: 2px dashed #ccc;
-            margin: 10px 0;
-        }
     </style>
 </head>
 <body>
@@ -86,6 +82,7 @@
     <div id="log"></div>
 
     <script>
+        const UL = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
         let startTime = 0;
         let activationCheckInterval;
         const buttons = document.querySelectorAll('button');
@@ -110,23 +107,59 @@
             const logDiv = document.getElementById('log');
             const time = getTimeSinceActivation().padStart(6, ' ');
             let prefix = '';
+            let consoleMethod = 'log';
             
             switch(type) {
-                case 'start': prefix = '🟢'; break;
-                case 'nav': prefix = '🔄'; break;
-                case 'check': prefix = '👉'; break;
-                case 'success': prefix = '✅'; break;
-                case 'fail': prefix = '❌'; break;
-                case 'end': prefix = '🔚'; break;
-                default: prefix = '  ';
+                case 'start': 
+                    prefix = '🟢'; 
+                    consoleMethod = 'group';
+                    break;
+                case 'nav': 
+                    prefix = '🔄';
+                    consoleMethod = 'info'; 
+                    break;
+                case 'check': 
+                    prefix = '👉';
+                    consoleMethod = 'debug'; 
+                    break;
+                case 'success': 
+                    prefix = '✅';
+                    consoleMethod = 'info'; 
+                    break;
+                case 'fail': 
+                    prefix = '❌';
+                    consoleMethod = 'error'; 
+                    break;
+                case 'end': 
+                    prefix = '🔚';
+                    consoleMethod = 'groupEnd'; 
+                    break;
+                default: 
+                    prefix = '  ';
+                    break;
             }
             
-            logDiv.innerHTML += `[${time}s] ${prefix} ${message}\n`;
+            const logMessage = `[${time}s] ${prefix} ${message}`;
+            
+            // UI logging
+            logDiv.innerHTML += logMessage + '\n';
             logDiv.scrollTop = logDiv.scrollHeight;
             
-            // Add separator after test completion
-            if (type === 'end') {
+            // Console logging with colors and grouping
+            if (consoleMethod === 'group') {
+                console.group(`%c${logMessage}`, 'color: green; font-weight: bold');
+            } else if (consoleMethod === 'groupEnd') {
+                console.log(`%c${logMessage}`, 'color: gray');
+                console.groupEnd();
                 logDiv.innerHTML += `${'='.repeat(50)}\n`;
+            } else {
+                const styles = {
+                    'error': 'color: red; font-weight: bold',
+                    'info': 'color: blue',
+                    'debug': 'color: gray',
+                    'log': 'color: black'
+                };
+                console[consoleMethod](`%c${logMessage}`, styles[consoleMethod]);
             }
         }
 
@@ -169,85 +202,71 @@
             if (isActive) {
                 log(`TUA is active, proceeding with app switch`, 'success');
                 await sleep(500);
-                stopActivationTracking(); // Stop tracking before navigation
-                location.href = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N';
+                stopActivationTracking();
+                
+                // Create and click an anchor tag instead of using location.href
+                const a = document.createElement('a');
+                a.href = UL;
+                a.click();
             } else {
                 log(`Cannot app switch - TUA not active`, 'fail');
                 enableAllButtons();
             }
         }
 
-        // Direct app switch - control test
-        document.getElementById('directSwitch').addEventListener('click', async () => {
-            disableAllButtons();
-            log('Starting direct app switch test', 'start');
-            startActivationTracking();
-            await sleep(500);
-            tryAppSwitch();
+        // Direct app switch - simple test
+        document.getElementById('directSwitch').addEventListener('click', () => {
+            log('Direct app switch initiated', 'start');
+            window.location.href = UL;
         });
 
-        // Single navigation test with 2s delay
-        document.getElementById('singleNavigation').addEventListener('click', async () => {
-            disableAllButtons();
-            log('Starting single navigation test', 'start');
-            startActivationTracking();
+        // Frame navigation test
+        document.getElementById('singleNavigation').addEventListener('click', () => {
+            log('Frame navigation test started', 'start');
+            log(`Initial TUA state: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
             
             const frame = document.getElementById('testFrame');
+            frame.src = 'about:blank';
+            log('Frame navigation initiated', 'nav');
             
-            // First check
-            log(`Initial TUA check: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
-            await sleep(1000);
-            
-            // Start navigation
-            log('Starting frame navigation', 'nav');
-            frame.src = 'about:blank?t=' + Date.now();
-            
-            frame.onload = async () => {
-                log('Frame navigation complete', 'nav');
-                await sleep(500);
-                
+            frame.onload = () => {
                 const isActive = navigator.userActivation.isActive;
                 log(`TUA after navigation: ${isActive ? 'Active' : 'Inactive'}`, 'check');
-                await sleep(500);
                 
-                tryAppSwitch();
+                if (isActive) {
+                    log('Proceeding with app switch', 'success');
+                    window.location.href = UL;
+                } else {
+                    log('TUA consumed by frame navigation', 'fail');
+                }
             };
         });
 
-        // Navigation with 3s delay
-        document.getElementById('delayedNavigation').addEventListener('click', async () => {
-            disableAllButtons();
-            log('Starting delayed navigation test', 'start');
-            startActivationTracking();
+        // Navigation with delay test
+        document.getElementById('delayedNavigation').addEventListener('click', () => {
+            log('Delayed navigation test started', 'start');
+            log(`Initial TUA state: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
             
             const frame = document.getElementById('testFrame');
-            
-            // Initial check
-            log(`Initial TUA check: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
-            await sleep(1000);
-            
-            // Wait 3 seconds
             log('Waiting 3 seconds before navigation...', 'info');
-            await sleep(3000);
             
-            // Check before navigation
-            log(`TUA before navigation: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
-            await sleep(500);
-            
-            // Start navigation
-            log('Starting frame navigation', 'nav');
-            frame.src = 'about:blank?t=' + Date.now();
-            
-            frame.onload = async () => {
-                log('Frame navigation complete', 'nav');
-                await sleep(500);
+            setTimeout(() => {
+                log(`TUA before delayed navigation: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
+                frame.src = 'about:blank';
+                log('Frame navigation initiated', 'nav');
                 
-                const isActive = navigator.userActivation.isActive;
-                log(`TUA after navigation: ${isActive ? 'Active' : 'Inactive'}`, 'check');
-                await sleep(500);
-                
-                tryAppSwitch();
-            };
+                frame.onload = () => {
+                    const isActive = navigator.userActivation.isActive;
+                    log(`TUA after navigation: ${isActive ? 'Active' : 'Inactive'}`, 'check');
+                    
+                    if (isActive) {
+                        log('Proceeding with app switch', 'success');
+                        window.location.href = UL;
+                    } else {
+                        log('TUA consumed by frame navigation', 'fail');
+                    }
+                };
+            }, 3000);
         });
 
         // Update status every 100ms
