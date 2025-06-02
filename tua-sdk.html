@@ -1,398 +1,161 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Transient User Activation Test</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Gesture Window Demo</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            padding: 16px;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.5;
-            font-size: 16px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
         }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 16px;
-            word-wrap: break-word;
-        }
-
         button {
-            padding: 12px 20px;
-            margin: 8px 0;
-            width: 100%;
-            max-width: 300px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            background: #fff;
+            padding: 15px 30px;
             font-size: 16px;
             cursor: pointer;
-            transition: all 0.2s;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            margin-right: 10px;
         }
-
-        button:active {
-            transform: scale(0.98);
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        #status {
-            margin: 16px 0;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            word-wrap: break-word;
-        }
-
-        .active {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .inactive {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        #log {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 12px;
-            margin: 16px 0;
-            height: 200px;
-            overflow-y: auto;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 13px;
-            line-height: 1.5;
-            background: #f8f9fa;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        iframe {
-            width: 100%;
-            height: 80px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            margin: 8px 0;
-        }
-
-        .test-section {
-            margin: 16px 0;
-            padding: 16px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background: #fff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .test-section h3 {
-            margin: 0 0 8px 0;
-            font-size: 18px;
-        }
-
-        .test-section p {
-            margin: 8px 0;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .delay-input {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 8px 0;
-        }
-
-        .delay-input input {
-            width: 100px;
-            padding: 8px;
+        #delayInput {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
+            border-radius: 5px;
+            width: 100px;
         }
-
-        .delay-input label {
-            font-size: 14px;
-            color: #666;
+        #status {
+            font-size: 18px;
+            margin: 20px 0;
+            min-height: 24px;
         }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 12px;
-            }
-
-            h1 {
-                font-size: 20px;
-            }
-
-            button {
-                padding: 10px 16px;
-                font-size: 14px;
-            }
-
-            #status {
-                font-size: 13px;
-                padding: 10px;
-            }
-
-            #log {
-                font-size: 12px;
-                height: 160px;
-            }
-
-            .test-section {
-                padding: 12px;
-            }
-
-            .test-section h3 {
-                font-size: 16px;
-            }
-
-            .test-section p {
-                font-size: 13px;
-            }
-
-            .delay-input {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .delay-input input {
-                width: 120px;
-            }
+        #isActiveLabel {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .active { color: green; }
+        .inactive { color: red; }
+        #myIframe {
+            width: 100%;
+            height: 120px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Transient User Activation Test</h1>
-    <div id="status">Checking activation status...</div>
-    
-    <div class="test-section">
-        <h3>Test 1: Direct App Switch (Control)</h3>
-        <p>Shows normal behavior - immediate app switch after click</p>
-        <button id="directSwitch">Direct App Switch</button>
-    </div>
 
-    <div class="test-section">
-        <h3>Test 2: Frame Navigation TUA Consumption</h3>
-        <p>Demonstrates how frame navigation affects TUA</p>
-        <button id="singleNavigation">Single Navigation Test (immediate)</button>
-        <div class="delay-input">
-            <label for="delayTime">Delay (milliseconds):</label>
-            <input type="number" id="delayTime" value="1000" min="0" step="100">
-        </div>
-        <button id="delayedNavigation">Navigation with Delay</button>
-    </div>
+<h1>User Gesture Window Demo</h1>
 
-    <iframe id="testFrame"></iframe>
-    <div id="log"></div>
+<label for="delayInput">Fetch Delay (ms):</label>
+<input type="number" id="delayInput" value="3000" min="0">
 
+<div id="isActiveLabel">isActive: <span id="isActiveValue"></span></div>
+
+<div>
+    <button id="sameOriginBtn">Same-origin Launch</button>
+    <button id="crossIframeBtn">Cross-iframe Launch</button>
+</div>
+
+<div id="status">Status will appear here.</div>
+
+<iframe id="myIframe"></iframe>
+
+<script>
+// Update user activation status
+function updateIsActiveLabel() {
+    const isActive = navigator.userActivation.isActive;
+    const isActiveValueElement = document.getElementById('isActiveValue');
+    isActiveValueElement.textContent = isActive;
+    const isActiveLabel = document.getElementById('isActiveLabel');
+    if (isActive) {
+        isActiveLabel.classList.remove('inactive');
+        isActiveLabel.classList.add('active');
+    } else {
+        isActiveLabel.classList.remove('active');
+        isActiveLabel.classList.add('inactive');
+    }
+}
+updateIsActiveLabel();
+document.addEventListener('click', updateIsActiveLabel);
+setInterval(updateIsActiveLabel, 100);
+
+const status = document.getElementById('status');
+const testUrl = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk'; // Universal Link for navigation
+
+// Same-origin test: click -> fetch -> navigate
+// This should get the full user gesture forwarding window
+
+document.getElementById('sameOriginBtn').addEventListener('click', async function() {
+    const fetchDelay = parseInt(document.getElementById('delayInput').value, 10) / 1000;
+    if (isNaN(fetchDelay) || fetchDelay < 0) {
+        alert('Please enter a valid positive number for the delay.');
+        return;
+    }
+    status.textContent = `Same-origin: Fetching with ${fetchDelay}s delay...`;
+    try {
+        await fetch(`https://httpbin.org/delay/${fetchDelay}`);
+        status.textContent = 'Same-origin: Fetch complete. Navigating...';
+        window.location.href = testUrl;
+    } catch (e) {
+        status.textContent = 'Same-origin: Fetch error.';
+    }
+});
+
+// Cross-iframe test: click -> postMessage to iframe -> iframe fetch -> postMessage back -> parent navigates
+// This simulates a cross-origin scenario where gesture context is not forwarded
+
+const iframe = document.getElementById('myIframe');
+const iframeContent = `
+<!DOCTYPE html>
+<html lang=\"en\">
+<head><meta charset=\"UTF-8\"></head>
+<body style=\"font-family:Arial;text-align:center;\">
+    <div id=\"iframeStatus\">Idle</div>
     <script>
-        const UL = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
-        let startTime = 0;
-        let activationCheckInterval;
-        const buttons = document.querySelectorAll('button');
-
-        function disableAllButtons() {
-            buttons.forEach(btn => btn.disabled = true);
-        }
-
-        function enableAllButtons() {
-            buttons.forEach(btn => btn.disabled = false);
-        }
-
-        function getTimeSinceActivation() {
-            return startTime ? ((performance.now() - startTime) / 1000).toFixed(2) : 'N/A';
-        }
-
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        function log(message, type = 'info') {
-            const logDiv = document.getElementById('log');
-            const time = getTimeSinceActivation().padStart(6, ' ');
-            let prefix = '';
-            let consoleMethod = 'log';
-            
-            switch(type) {
-                case 'start': 
-                    prefix = '🟢'; 
-                    consoleMethod = 'group';
-                    break;
-                case 'nav': 
-                    prefix = '🔄';
-                    consoleMethod = 'info'; 
-                    break;
-                case 'check': 
-                    prefix = '👉';
-                    consoleMethod = 'debug'; 
-                    break;
-                case 'success': 
-                    prefix = '✅';
-                    consoleMethod = 'info'; 
-                    break;
-                case 'fail': 
-                    prefix = '❌';
-                    consoleMethod = 'error'; 
-                    break;
-                case 'end': 
-                    prefix = '🔚';
-                    consoleMethod = 'groupEnd'; 
-                    break;
-                default: 
-                    prefix = '  ';
-                    break;
-            }
-            
-            const logMessage = `[${time}s] ${prefix} ${message}`;
-            
-            // UI logging
-            logDiv.innerHTML += logMessage + '\n';
-            logDiv.scrollTop = logDiv.scrollHeight;
-            
-            // Console logging with colors and grouping
-            if (consoleMethod === 'group') {
-                console.group(`%c${logMessage}`, 'color: green; font-weight: bold');
-            } else if (consoleMethod === 'groupEnd') {
-                console.log(`%c${logMessage}`, 'color: gray');
-                console.groupEnd();
-                logDiv.innerHTML += `${'='.repeat(50)}\n`;
-            } else {
-                const styles = {
-                    'error': 'color: red; font-weight: bold',
-                    'info': 'color: blue',
-                    'debug': 'color: gray',
-                    'log': 'color: black'
-                };
-                console[consoleMethod](`%c${logMessage}`, styles[consoleMethod]);
+    window.addEventListener('message', async function(event) {
+        if (event.data && event.data.action === 'startFetch') {
+            const delay = event.data.delay;
+            document.getElementById('iframeStatus').textContent = 'Iframe: Fetching with ' + delay + 's delay...';
+            try {
+                await fetch('https://httpbin.org/delay/' + delay);
+                document.getElementById('iframeStatus').textContent = 'Iframe: Fetch complete. Notifying parent...';
+                parent.postMessage({ action: 'iframeDone' }, '*');
+            } catch (e) {
+                document.getElementById('iframeStatus').textContent = 'Iframe: Fetch error.';
             }
         }
+    });
+    <\/script>
+</body>
+</html>
+`;
+iframe.srcdoc = iframeContent;
 
-        function updateStatus() {
-            const status = document.getElementById('status');
-            const isActive = navigator.userActivation.isActive;
-            const hasBeenActive = navigator.userActivation.hasBeenActive;
-            status.textContent = `Current Status:  ${isActive ? '✅ ACTIVE' : '❌ INACTIVE'}  |  Has been active: ${hasBeenActive ? 'Yes' : 'No'}`;
-            status.className = isActive ? 'active' : 'inactive';
-        }
+// Parent listens for iframe's message
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.action === 'iframeDone') {
+        status.textContent = 'Cross-iframe: Iframe done. Navigating...';
+        window.location.href = testUrl;
+    }
+});
 
-        function startActivationTracking() {
-            startTime = performance.now();
-            if (activationCheckInterval) {
-                clearInterval(activationCheckInterval);
-            }
-            activationCheckInterval = setInterval(() => {
-                const isActive = navigator.userActivation.isActive;
-                if (!isActive && startTime) {
-                    log('TUA expired or consumed', 'fail');
-                    clearInterval(activationCheckInterval);
-                    startTime = 0;
-                    enableAllButtons();
-                }
-            }, 100);
-        }
+document.getElementById('crossIframeBtn').addEventListener('click', function() {
+    const fetchDelay = parseInt(document.getElementById('delayInput').value, 10) / 1000;
+    if (isNaN(fetchDelay) || fetchDelay < 0) {
+        alert('Please enter a valid positive number for the delay.');
+        return;
+    }
+    status.textContent = `Cross-iframe: Sending fetch request to iframe (${fetchDelay}s delay)...`;
+    iframe.contentWindow.postMessage({ action: 'startFetch', delay: fetchDelay }, '*');
+});
+</script>
 
-        function stopActivationTracking() {
-            if (activationCheckInterval) {
-                clearInterval(activationCheckInterval);
-                activationCheckInterval = null;
-            }
-        }
-
-        async function tryAppSwitch() {
-            const isActive = navigator.userActivation.isActive;
-            log(`Checking if app switch possible...`, 'check');
-            await sleep(500);
-            
-            if (isActive) {
-                log(`TUA is active, proceeding with app switch`, 'success');
-                await sleep(500);
-                stopActivationTracking();
-                
-                // Create and click an anchor tag instead of using location.href
-                const a = document.createElement('a');
-                a.href = UL;
-                a.click();
-            } else {
-                log(`Cannot app switch - TUA not active`, 'fail');
-                enableAllButtons();
-            }
-        }
-
-        // Direct app switch - simple test
-        document.getElementById('directSwitch').addEventListener('click', () => {
-            log('Direct app switch initiated', 'start');
-            while(navigator.userActivation.isActive && navigator.userActivation.hasBeenActive) {
-                log('TUA is active, waiting for it to expire', 'check');
-            }
-            window.location.href = UL;
-        });
-
-        // Frame navigation test - immediate (should succeed)
-        document.getElementById('singleNavigation').addEventListener('click', () => {
-            log('Immediate frame navigation test started', 'start');
-            log(`Initial TUA state: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
-            
-            const frame = document.getElementById('testFrame');
-            
-            // Queue both the navigation and app switch immediately
-            frame.src = 'about:blank';
-            log('Frame navigation initiated', 'nav');
-            
-            // Attempt app switch right away
-            log('Attempting immediate app switch', 'check');
-            window.location.href = UL;
-        });
-
-        // Navigation with delay test (should fail)
-        document.getElementById('delayedNavigation').addEventListener('click', () => {
-            const delayMs = parseInt(document.getElementById('delayTime').value) || 1000;
-            
-            log('Delayed navigation test started', 'start');
-            log(`Initial TUA state: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
-            log(`Using delay of ${delayMs}ms`, 'info');
-            
-            const frame = document.getElementById('testFrame');
-            
-            // Simulate API call with Promise
-            Promise.resolve()
-                .then(() => new Promise(resolve => setTimeout(resolve, delayMs)))
-                .then(() => {
-                    log(`TUA before delayed navigation: ${navigator.userActivation.isActive ? 'Active' : 'Inactive'}`, 'check');
-                    frame.src = 'about:blank';
-                    log('Frame navigation initiated', 'nav');
-                    
-                    frame.onload = () => {
-                        const isActive = navigator.userActivation.isActive;
-                        log(`TUA after navigation: ${isActive ? 'Active' : 'Inactive'}`, 'check');
-                        
-                        if (isActive) {
-                            log('Proceeding with app switch', 'success');
-                            window.location.href = UL;
-                        } else {
-                            log('TUA consumed by frame navigation - app switch will fail', 'fail');
-                        }
-                    };
-                });
-        });
-
-        // Update status every 100ms
-        setInterval(updateStatus, 100);
-    </script>
 </body>
 </html>
