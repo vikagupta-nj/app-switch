@@ -114,22 +114,23 @@ document.getElementById('sameOriginBtn').addEventListener('click', async functio
 const iframe = document.getElementById('myIframe');
 iframe.src = 'https://spiced-right-stool.glitch.me'; // Use deployed cross-origin iframe
 
-// Parent listens for iframe's message
+// Parent listens for iframe's message (step 4: button click -> postMessage to merchant)
 window.addEventListener('message', function(event) {
-    if (event.data && event.data.action === 'iframeDone') {
-        status.textContent = 'Cross-iframe: Iframe done. Navigating...';
-        window.location.href = testUrl;
+    if (event.data && event.data.action === 'buttonClicked') {
+        status.textContent = 'Merchant: Received button click from PayPal SDK. Simulating processing...';
+        // Simulate merchant processing (step 5), then notify SDK to continue
+        setTimeout(() => {
+            status.textContent = 'Merchant: Returning control to PayPal SDK for fetch and redirect.';
+            iframe.contentWindow.postMessage({ action: 'continueSdkFlow', url: testUrl }, '*');
+        }, 0); // No delay, but could add delay to simulate merchant work
+    } else if (event.data && event.data.action === 'iframeStatus') {
+        status.textContent = 'PayPal SDK: ' + event.data.message;
     }
 });
 
 document.getElementById('crossIframeBtn').addEventListener('click', function() {
-    const fetchDelay = parseInt(document.getElementById('delayInput').value, 10) / 1000;
-    if (isNaN(fetchDelay) || fetchDelay < 0) {
-        alert('Please enter a valid positive number for the delay.');
-        return;
-    }
-    status.textContent = `Cross-iframe: Sending fetch request to iframe (${fetchDelay}s delay)...`;
-    iframe.contentWindow.postMessage({ action: 'startFetch', delay: fetchDelay }, '*');
+    // This button now just updates status, real flow starts from iframe button
+    status.textContent = 'Click the PayPal button in the iframe to start the flow.';
 });
 </script>
 
