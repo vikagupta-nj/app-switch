@@ -120,9 +120,12 @@ window.addEventListener('message', function(event) {
         status.textContent = 'Merchant: Received button click from PayPal SDK. Simulating processing...';
         // Simulate merchant processing (step 5), then notify SDK to continue
         setTimeout(() => {
-            status.textContent = 'Merchant: Returning control to PayPal SDK for fetch and redirect.';
-            iframe.contentWindow.postMessage({ action: 'continueSdkFlow', url: testUrl }, '*');
+            status.textContent = 'Merchant: Instructing PayPal SDK to fetch and notify.';
+            iframe.contentWindow.postMessage({ action: 'continueSdkFlow' }, '*');
         }, 0); // No delay, but could add delay to simulate merchant work
+    } else if (event.data && event.data.action === 'sdkFetchDone') {
+        status.textContent = 'Merchant: PayPal SDK finished fetch, performing Universal Link navigation...';
+        window.location.href = testUrl;
     } else if (event.data && event.data.action === 'iframeStatus') {
         status.textContent = 'PayPal SDK: ' + event.data.message;
     }
