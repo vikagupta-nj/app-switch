@@ -112,31 +112,7 @@ document.getElementById('sameOriginBtn').addEventListener('click', async functio
 // This simulates a cross-origin scenario where gesture context is not forwarded
 
 const iframe = document.getElementById('myIframe');
-const iframeContent = `
-<!DOCTYPE html>
-<html lang=\"en\">
-<head><meta charset=\"UTF-8\"></head>
-<body style=\"font-family:Arial;text-align:center;\">
-    <div id=\"iframeStatus\">Idle</div>
-    <script>
-    window.addEventListener('message', async function(event) {
-        if (event.data && event.data.action === 'startFetch') {
-            const delay = event.data.delay;
-            document.getElementById('iframeStatus').textContent = 'Iframe: Fetching with ' + delay + 's delay...';
-            try {
-                await fetch('https://httpbin.org/delay/' + delay);
-                document.getElementById('iframeStatus').textContent = 'Iframe: Fetch complete. Notifying parent...';
-                parent.postMessage({ action: 'iframeDone' }, '*');
-            } catch (e) {
-                document.getElementById('iframeStatus').textContent = 'Iframe: Fetch error.';
-            }
-        }
-    });
-    <\/script>
-</body>
-</html>
-`;
-iframe.srcdoc = iframeContent;
+iframe.src = 'https://spiced-right-stool.glitch.me'; // Use deployed cross-origin iframe
 
 // Parent listens for iframe's message
 window.addEventListener('message', function(event) {
