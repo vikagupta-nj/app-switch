@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PayPal App Switch - History Test</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f2f2f2;
+      padding: 50px;
+    }
+    a {
+      display: inline-block;
+      padding: 15px 25px;
+      background-color: #0070ba;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    a:hover {
+      background-color: #003087;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Rewrite History</h2>
+  <form id="rewrite">
+    <label for="path">Path</label>
+    <input id="path" name="path" type="text" />
+    <label for="query">Query</label>
+    <input id="query" name="query" type="text" value="foo=bar" />
+    <button type="submit">Rewrite</button>
+  </form>
+
+  <p>Output: <span id="output"></span></p>
+
+  <script>
+    var form = document.querySelector('#rewrite')
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault()
+
+        const formData = new FormData(form)
+
+        const path = formData.get('path')
+        const query = formData.get('query') || ''
+
+        var url = "".concat(path, "?").concat(query).concat(window.location.hash);
+        var initialURL = new URL(url, window.location.origin);
+
+        try {
+            window.history.replaceState(undefined, "", initialURL);
+            document.querySelector('#output').textContent = initialURL.toString()
+        } catch (e) {
+            document.querySelector('#output').textContent = "Error: " + e.toString()
+        }
+    })
+</script>
+</body>
+</html>
