@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PayPal App Switch Test</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f2f2f2;
+      padding: 50px;
+    }
+    a {
+      display: inline-block;
+      padding: 15px 25px;
+      background-color: #0070ba;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    a:hover {
+      background-color: #003087;
+    }
+  </style>
+</head>
+<body>
+  <h2>PayPal App Switch - Bridge</h2>
+  <p>Click the button below to open Bridge:</p>
+  <a href="https://www.braintree.stage.paypal.com/pay/app-switch?token=4Y9336099T705014M&ssrt=1755019519360&tokenType=ORDER_ID#Origin">
+    Launch Bridge
+  </a>
+</body>
+</html>
