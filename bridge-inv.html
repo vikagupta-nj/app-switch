@@ -4,15 +4,15 @@
     <title>Opening PayPal...</title>
 </head>
 <body>
-    <a href="https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228" id="universalLink">Open PayPal</a>
+    <a href="https://www.paypal.com/app-switch-checkout?token=22E37457WL3865120&tokenType=ORDER_ID" id="universalLink">Open PayPal</a>
     
     <script>
         window.addEventListener('load', () => {
-           document.getElementById('universalLink').click();
+           // document.getElementById('universalLink').click();
             // Try to trigger the universal link again
             setTimeout(function() {
                 window.location.assign("https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228")
-            }, 500);
+            }, 100);
         })
     </script>
 </body>
