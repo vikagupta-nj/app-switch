@@ -1,0 +1,19 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opening PayPal...</title>
+</head>
+<body>
+    <a href="https://www.paypal.com/app-switch-checkout?token=22E37457WL3865120&tokenType=ORDER_ID" id="universalLink">Open PayPal</a>
+    
+    <script>
+        window.addEventListener('load', () => {
+            // Try to trigger the universal link again
+            setTimeout(function() {
+                document.getElementById('universalLink').click();
+            }, 2000);
+        })
+    </script>
+</body>
+</html>
