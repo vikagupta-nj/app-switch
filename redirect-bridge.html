@@ -24,13 +24,19 @@
 </head>
 <body>
   <h2>PayPal App Switch - Bridge</h2>
-  <p>Click the button below to open Bridge:</p>
+<!--   <p>Click the button below to open Bridge:</p>
   <a href="https://www.braintree.stage.paypal.com/pay/app-switch?token=22E37457WL3865120&ssrt=1755027296615&tokenType=ORDER_ID&appLink=https%3A%2F%2Fpaypal.com%2Fapp-switch-checkout%3FappSwitchEligible%3Dtrue%26token%3D22E37457WL3865120%26tokenType%3DORDER_ID">
     Launch Bridge
+  </a> -->
+
+  <a href="https://www.paypal.com/app-switch-checkout?token=22E37457WL3865120&tokenType=ORDER_ID">Open Universal Link</a>
+
+  <a href="/app-switch/bridge-simulated-interaction.html">
+    Open Simulated Bridge - Auto Redirect (Simulated User Interaction)
   </a>
-  <p>Click the button below to open a page that will simulate the Bridge:</p>
-  <a href="/app-switch/bridge-inv.html">
-    Launch Simulated Bridge
+  
+  <a href="/app-switch/bridge-no-interaction.html">
+    Open Simulated Bridge - Auto Redirect (No User Interaction)
   </a>
 </body>
 </html>
