@@ -57,9 +57,24 @@
     document.getElementById('sdk').addEventListener('click', () => {
       const result = window.open('about:blank')
 
-      setTimeout(() => {
-        result.document.location = 'https://www.paypal.com/app-switch-checkout?token=27J33852T0966232G&tokenType=ORDER_ID'
-      }, 1000)
+      const button = document.createElement('button')
+      button.textContent = 'Open Univsal Link'
+      button.id = 'test'
+      const script = document.createElement('script');
+      script.textContent = `
+        (function() {
+          const button = document.getElementById('test');
+          if (button instanceof HTMLButtonElement) {
+            button.click();
+            alert('Called!')
+          } else {
+            console.warn('Button with id "test" not found or is not a button element');
+          }
+        })();
+      `;
+      
+      result.document.documentElement.appendChild(button)
+      result.document.documentElement.appendChild(script)
 
     })
   </script>
