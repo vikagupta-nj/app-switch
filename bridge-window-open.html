@@ -6,13 +6,31 @@
 <body>
     <a href="https://www.paypal.com/app-switch-checkout?token=27J33852T0966232G&tokenType=ORDER_ID" id="universalLink">Open PayPal</a>
 
+
+    <button type="button" id="testme">Click Me</button>
     <p>This is the Bridge!</p>
     
     <script>
+        document.querySelector('#testme').addEventListener('click', (e) => {
+            console.log('Clicked!', e)
+        })
+
+        document.addEventListener('unload', () => {
+            console.log('On unload!')
+            window.postMessage('unloading')
+        })
+
         window.addEventListener('load', () => {
-           const result = window.open('https://www.paypal.com/app-switch-checkout?token=27J33852T0966232G&tokenType=ORDER_ID', '_self', 'popup')
-        
-            console.log('Result', result)
+            for (let x = 0; x < 10; x++) {
+                document.getElementById('#testme').click()
+                console.log('Clicking!')
+            }
+
+           setTimeout(() => {
+                const result = window.open('https://www.paypal.com/app-switch-checkout?token=27J33852T0966232G&tokenType=ORDER_ID', '_self', 'popup')
+            
+                console.log('Result', result)
+           }, 1000)
         })
     </script>
 </body>

@@ -48,5 +48,11 @@
   <a href="/app-switch/bridge-window-open.html">
     Open Simulated Bridge - window.open
   </a>
+
+  <script>
+    window.onmessage(e => {
+      console.log('onmessage', e)
+    })
+  </script>
 </body>
 </html>
