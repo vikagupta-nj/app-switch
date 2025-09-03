@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="/.well-known/manifest.webmanifest">
+    <link rel="manifest" href="https://www.paypal.com/.well-known/manifest.webmanifest">
     <title>Opening PayPal...</title>
 </head>
 <body>
@@ -12,7 +12,7 @@
         window.addEventListener('load', () => {
             window.location.replace(`#${'appswitch'.replace(/^#/, "")}`);
             console.log('set hash')
-           window.location.replace("https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228")
+           window.location.replace("https://paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228")
         })
 
         
