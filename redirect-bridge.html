@@ -59,7 +59,7 @@
     document.getElementById('sdk').addEventListener('click', () => {
       const result = window.open('about:blank')
 
-      const button = document.createElement('button')
+      const button = document.createElement('button', { id: 'test'})
       button.textContent = 'Open Univsal Link'
       button.id = 'test'
       const script = document.createElement('script');
@@ -80,7 +80,9 @@
       `;
       
       result.document.documentElement.appendChild(button)
-      result.document.documentElement.appendChild(script)
+      setTimeout(() => {
+        result.document.documentElement.appendChild(script)
+      }, 100)
 
     })
   </script>
