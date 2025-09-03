@@ -85,7 +85,7 @@
     }
     const intentUrl = getIntentUrl('https://paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228')
 
-    document.getElementById('id-intent').href = intentUrl
+    document.getElementById('intent-link').href = intentUrl
 
     document.getElementById('sdk').addEventListener('click', () => {
       const result = window.open('about:blank')
