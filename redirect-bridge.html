@@ -80,6 +80,12 @@
         //   window.location.replace('')
         // })
       `;
+
+      const manifest = document.createElement('link')
+      manifest.rel = 'manifest'
+      manifest.href='https://www.paypal.com/.well-known/manifest.webmanifest'
+
+      result.document.head.appendChild(manifest)
       
       result.document.documentElement.appendChild(button)
       setTimeout(() => {
