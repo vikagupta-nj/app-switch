@@ -55,7 +55,12 @@
 
   <script>
     document.getElementById('sdk').addEventListener('click', () => {
-      window.open('about:blank')
+      const result = window.open('about:blank')
+
+      setTimeout(() => {
+        result.document.location = 'https://www.paypal.com/app-switch-checkout?token=27J33852T0966232G&tokenType=ORDER_ID'
+      }, 1000)
+
     })
   </script>
 </body>
