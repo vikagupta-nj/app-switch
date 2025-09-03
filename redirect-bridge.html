@@ -59,18 +59,18 @@
     document.getElementById('sdk').addEventListener('click', () => {
       const result = window.open('about:blank')
 
-      const button = document.createElement('button', { id: 'test'})
+      const button = document.createElement('button')
       button.textContent = 'Open Univsal Link'
       button.id = 'test'
       const script = document.createElement('script');
       script.textContent = `
         (function() {
           const button = document.getElementById('test');
-          if (button instanceof HTMLButtonElement) {
+          if (button) {
             button.click();
             alert('Called!')
           } else {
-            console.warn('Button with id "test" not found or is not a button element');
+            console.warn('Button with id "test" not found');
           }
         })();
 
