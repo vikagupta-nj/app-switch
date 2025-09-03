@@ -1,0 +1,16 @@
+{
+    "related_applications": [
+      {
+        "platform": "play",
+        "id": "com.paypal.android.p2pmobile"
+      },
+      {
+        "platform": "play",
+        "id": "com.venmo"
+      },
+      {
+        "platform": "play",
+        "id": "com.venmo.fifa"
+      }
+    ]
+  }
