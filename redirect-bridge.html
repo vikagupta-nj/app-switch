@@ -32,6 +32,8 @@
 
   <a href="https://www.paypal.com/app-switch-checkout?token=22E37457WL3865120&tokenType=ORDER_ID">Open Universal Link</a>
 
+  <a href="" id="intent-link">Open Universal Link (Intent)</a>
+
   <p>Simulate user interaction by opening Universal Link by clicking a button with JavaScript</p>
 
   <a href="/app-switch/bridge-simulate-interaction.html">
@@ -56,6 +58,12 @@
     Open using Intent - Same window
   </a>
 
+  <p>Use intent - sdk simualation</p>
+
+  <button id="sdk-intent">
+    Open Popup - Intent
+  </button>
+
   <p>Simulate SDK flow</p>
 
   <button id="sdk">
@@ -67,8 +75,18 @@
   <button id="sdk-popup-redirect">
     Open Popup
   </button>
+  
 
   <script>
+    function getIntentUrl(redirectUrl) {
+        const encodedRedirect = redirectUrl.replace(/^https?:\/\//, '');
+        const encodedFallback = encodeURIComponent(redirectUrl);
+        return `intent://${encodedRedirect}#Intent;scheme=https;package=com.paypal.android.p2pmobile;S.browser_fallback_url=${encodedFallback};end;`;    
+    }
+    const intentUrl = getIntentUrl('https://paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228')
+
+    document.getElementById('id-intent').href = intentUrl
+
     document.getElementById('sdk').addEventListener('click', () => {
       const result = window.open('about:blank')
 
@@ -113,6 +131,14 @@
       const result = window.open('about:blank', '', '')
 
       result.document.location = 'https://vikagupta-nj.github.io/app-switch/popup.html'
+    })
+  </script>
+
+  <script>
+    document.getElementById('sdk-intent').addEventListener('click', () => {
+      const result = window.open('about:blank', '', '')
+
+      result.document.location = 'https://vikagupta-nj.github.io/app-switch/intent.html'
     })
   </script>
 </body>
