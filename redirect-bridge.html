@@ -59,24 +59,26 @@
     document.getElementById('sdk').addEventListener('click', () => {
       const result = window.open('about:blank')
 
-      const button = document.createElement('button')
+      const button = document.createElement('a')
       button.textContent = 'Open Univsal Link'
       button.id = 'test'
+      button.href = 'https://www.paypal.com/app-switch-checkout?token=22E37457WL3865120&tokenType=ORDER_ID'
       const script = document.createElement('script');
       script.textContent = `
         (function() {
           const button = document.getElementById('test');
           if (button) {
+          console.log('Clicked!')
             button.click();
-            alert('Called!')
           } else {
             console.warn('Button with id "test" not found');
           }
         })();
 
-        document.getElementById('test').addEventListener('click', () => {
-          window.location.replace('https://www.paypal.com/app-switch-checkout?token=22E37457WL3865120&tokenType=ORDER_ID')
-        })
+        // document.getElementById('test').addEventListener('click', () => {
+        //   console.log('Called!')
+        //   window.location.replace('')
+        // })
       `;
       
       result.document.documentElement.appendChild(button)
