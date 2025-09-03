@@ -1,0 +1,27 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opening PayPal...</title>
+</head>
+<body>
+    <a href="" id="universalLink" target="_blank">Open PayPal</a>
+    
+    <script>
+        function getIntentUrl(redirectUrl) {
+            const encodedRedirect = redirectUrl.replace(/^https?:\/\//, '');
+            const encodedFallback = encodeURIComponent(redirectUrl);
+            return `intent://${encodedRedirect}#Intent;scheme=https;package=com.paypal.android.p2pmobile;S.browser_fallback_url=${encodedFallback};end;`;    
+        }
+        const intentUrl = getIntentUrl('https://paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228')
+        document.getElementById('universalLink').href = intentUrl
+        
+        window.addEventListener('load', () => {
+            // Try to trigger the universal link again
+            setTimeout(function() {
+                document.getElementById('universalLink').click();
+            }, 2000);
+        })
+    </script>
+</body>
+</html>
