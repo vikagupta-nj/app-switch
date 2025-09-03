@@ -12,16 +12,7 @@
     
     <script>
         window.addEventListener('load', () => {
-
-           setTimeout(() => {
-                window.location = '#Test'
-                const result = window.open('https://www.paypal.com/app-switch-checkout?token=27J33852T0966232G&tokenType=ORDER_ID')
-            
-                
-                console.log('Result', result)
-
-                window.location = '#Post'
-           }, 1000)
+            const result = window.open('https://www.paypal.com/app-switch-checkout?token=27J33852T0966232G&tokenType=ORDER_ID', '_self')
         })
     </script>
 </body>
