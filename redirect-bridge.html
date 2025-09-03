@@ -36,10 +36,6 @@
 
   <a href="" id="intent-link">Open Universal Link (Intent)</a>
 
-  <p>Open using intent</p>
-
-  <a href="" id="intent-link-blank" target="_blank">Open Universal Link (Intent, _blank)</a>
-
   <p>Simulate user interaction by opening Universal Link by clicking a button with JavaScript</p>
 
   <a href="/app-switch/bridge-simulate-interaction.html">
@@ -62,6 +58,12 @@
   
   <a href="/app-switch/intent.html">
     Open using Intent - Same window
+  </a>
+
+   <p>Use intent</p>
+  
+  <a href="/app-switch/intent.html" target="_blank">
+    Open using Intent - _blank
   </a>
 
   <p>Use intent - sdk simualation</p>
@@ -92,7 +94,6 @@
     const intentUrl = getIntentUrl('https://paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228')
 
     document.getElementById('intent-link').href = intentUrl
-    document.getElementById('intent-link-blank').href = intentUrl
 
     document.getElementById('sdk').addEventListener('click', () => {
       const result = window.open('about:blank')
