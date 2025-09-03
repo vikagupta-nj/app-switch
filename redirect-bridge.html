@@ -55,6 +55,12 @@
     Open Popup
   </button>
 
+  <p>Simulate SDK flow (redierct in popup)</p>
+
+  <button id="sdk-popup-redirect">
+    Open Popup
+  </button>
+
   <script>
     document.getElementById('sdk').addEventListener('click', () => {
       const result = window.open('about:blank')
@@ -92,6 +98,14 @@
         result.document.documentElement.appendChild(script)
       }, 500)
 
+    })
+  </script>
+
+  <script>
+    document.getElementById('sdk-popup-redirect').addEventListener('click', () => {
+      const result = window.open('about:blank')
+
+      result.document.location = 'https://vikagupta-nj.github.io/app-switch/popup.html'
     })
   </script>
 </body>
