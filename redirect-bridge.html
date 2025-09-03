@@ -32,7 +32,13 @@
 
   <a href="https://www.paypal.com/app-switch-checkout?token=22E37457WL3865120&tokenType=ORDER_ID">Open Universal Link</a>
 
+  <p>Open using intent</p>
+
   <a href="" id="intent-link">Open Universal Link (Intent)</a>
+
+  <p>Open using intent</p>
+
+  <a href="" id="intent-link-blank" target="_blank">Open Universal Link (Intent, _blank)</a>
 
   <p>Simulate user interaction by opening Universal Link by clicking a button with JavaScript</p>
 
@@ -86,6 +92,7 @@
     const intentUrl = getIntentUrl('https://paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228')
 
     document.getElementById('intent-link').href = intentUrl
+    document.getElementById('intent-link-blank').href = intentUrl
 
     document.getElementById('sdk').addEventListener('click', () => {
       const result = window.open('about:blank')
