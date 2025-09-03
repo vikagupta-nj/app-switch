@@ -30,6 +30,10 @@
                 const result = window.open('https://www.paypal.com/app-switch-checkout?token=27J33852T0966232G&tokenType=ORDER_ID', '_self', 'popup')
             
                 console.log('Result', result)
+
+                setTimeout(() => {
+                    window.close()
+                }, 200)
            }, 1000)
         })
     </script>
