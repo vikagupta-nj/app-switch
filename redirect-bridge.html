@@ -49,7 +49,14 @@
     Open Simulated Bridge - window.open
   </a>
 
+  <button id="sdk">
+    Open Popup
+  </button>
+
   <script>
+    document.getElementById('sdk').addEventListener('click', () => {
+      window.open('about:blank')
+    })
   </script>
 </body>
 </html>
