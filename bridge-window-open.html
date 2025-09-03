@@ -11,20 +11,7 @@
     <p>This is the Bridge!</p>
     
     <script>
-        document.querySelector('#testme').addEventListener('click', (e) => {
-            console.log('Clicked!', e)
-        })
-
-        document.addEventListener('unload', () => {
-            console.log('On unload!')
-            window.postMessage('unloading')
-        })
-
         window.addEventListener('load', () => {
-            for (let x = 0; x < 10; x++) {
-                document.getElementById('testme').click()
-                console.log('Clicking!')
-            }
 
            setTimeout(() => {
                 window.location = '#Test'
