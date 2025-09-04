@@ -90,6 +90,10 @@
     Open Popup
   </button>
 
+  <button id="sdk-popup-real-bridge">
+    Open Popup - real bridge
+  </button>
+
   <p>Spacing..<br><br></p>
   
 
@@ -142,11 +146,19 @@
     })
   </script>
 
-  <script>
+    <script>
     document.getElementById('sdk-popup-redirect').addEventListener('click', () => {
       const result = window.open('about:blank', '', '')
 
-      result.location = 'https://vikagupta-nj.github.io/app-switch/popup.html'
+      result.location = 'https://paypal.com/pay/app-switch?'
+    })
+  </script>
+
+  <script>
+    document.getElementById('sdk-popup-real-bridge').addEventListener('click', () => {
+      const result = window.open('about:blank', '', '')
+
+      result.location = 'https://www.paypal.com/pay/app-switch?token=15624925VR2562944&appLink=https%3A%2F%2Fpaypal.com%2Fapp-switch-checkout%3FappSwitchEligible%3Dtrue%26token%3D15624925VR2562944%26tokenType%3DORDER_ID'
     })
   </script>
 
