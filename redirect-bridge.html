@@ -151,6 +151,8 @@
       const result = window.open('about:blank', '', '')
 
       result.location = 'https://vikagupta-nj.github.io/app-switch/popup.html'
+      
+      window.postMessage({foo: 'bar'})
     })
   </script>
 
