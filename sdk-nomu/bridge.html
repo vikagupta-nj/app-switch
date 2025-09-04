@@ -1,0 +1,56 @@
+<h1>Bridge</h1>
+<p id="status">Waiting…</p>
+<button id="relaunch" hidden>Open in PayPal app again</button>
+
+<script>
+  // History hardening: keep T2 from snapping back
+  history.replaceState(null, "", location.href);
+  history.pushState(null, "", location.href);
+  addEventListener("popstate", () => history.pushState(null, "", location.href));
+
+  const params  = new URLSearchParams(location.search);
+  const token   = params.get("token")   || "EC-EXAMPLE";
+  const sdkMeta = params.get("sdkMeta") || "ENCODED_SDK_META";
+  const appLink = `https://paypal.com/app-switch-checkout?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
+
+  const isAndroidChrome = /Android/i.test(navigator.userAgent) && /Chrome\/\d+/i.test(navigator.userAgent) && !/SamsungBrowser/i.test(navigator.userAgent);
+
+  // Receive message from merchant to launch app (non-Android could do it from here)
+  addEventListener("message", (e) => {
+    if (e?.data?.launch === "app") {
+      if (isAndroidChrome) {
+        // Already launched from merchant’s gesture via T3; do nothing.
+      } else {
+        // Non-Android Chrome: safe to launch directly
+        location.href = appLink;
+      }
+    }
+  });
+
+  // When coming back, resume polling and route to merchant as per HLD (stub here)
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      document.getElementById("status").textContent = "Back on bridge. Checking status…";
+      // TODO: fetch token status via ModXO backend → XOOS, then redirect to merchant.
+    }
+  });
+
+  // If the app didn’t open, expose a manual relaunch (uses a throwaway tab on Android)
+  setTimeout(() => {
+    const btn = document.getElementById("relaunch");
+    btn.hidden = false;
+    btn.onclick = () => {
+      if (isAndroidChrome) {
+        const T3 = window.open("about:blank", "_blank", "noopener");
+        if (T3) {
+          try { T3.location = appLink; } catch(_) {}
+          setTimeout(() => { try { T3.close(); } catch(_) {} }, 1800);
+        } else {
+          location.href = appLink;
+        }
+      } else {
+        location.href = appLink;
+      }
+    };
+  }, 1600);
+</script>
