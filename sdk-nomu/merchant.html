@@ -2,58 +2,40 @@
 <html lang="en">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Merchant • Pay with PayPal (Sim)</title>
+<title>Merchant • Minimal Launcher</title>
 <style>
   :root { color-scheme: light dark; }
   body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
   main { min-height: 100svh; display:grid; place-items:center; padding:24px; }
-  button {
+  a.button {
+    display:block; text-align:center; text-decoration:none;
+    padding:16px 20px; border-radius:14px; font-size:18px;
+    background:#0070ba; color:#fff; width:100%; max-width:420px;
     -webkit-tap-highlight-color: transparent;
-    appearance:none; font-size:18px; border:0; border-radius:14px;
-    padding:16px 20px; background:#0070ba; color:#fff; width:100%; max-width:420px;
   }
-  p { max-width:520px; line-height:1.4; opacity:.75; text-align:center; }
+  p { max-width:520px; opacity:.75; line-height:1.4; text-align:center; margin-top:12px; }
 </style>
 <main>
-  <div>
-    <button id="pay">Pay with PayPal</button>
-    <p>Opens a bridge tab (T2) and launches the PayPal app from a tiny, disposable tab to keep T2 open on Android Chrome.</p>
-  </div>
+  <!-- Use a real link so the browser treats it as a user gesture to open a new tab -->
+  <a id="pay" class="button" target="_blank" rel="noopener"
+     href="bridge.html?token=EC-EXAMPLE&sdkMeta=ENCODED_SDK_META">
+     Pay with PayPal
+  </a>
+  <p>If a new tab didn’t open, your browser blocked popups. Tap and hold, then “Open in new tab”.</p>
 </main>
 
 <script>
-  // Minimal config (replace with real values)
-  const token   = "EC-EXAMPLE";
-  const sdkMeta = "ENCODED_SDK_META";
+  // Optional: JS fallback if you must compute the bridge URL dynamically.
+  // Keeps a SINGLE popup total (one tab, allowed). 
+  (function(){
+    const btn = document.getElementById('pay');
+    // If you need to build the URL at runtime, do it here:
+    // const token = 'EC-EXAMPLE', sdkMeta = 'ENCODED_SDK_META';
+    // btn.href = `bridge.html?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
 
-  // HLD pattern: non-www HTTPS app link so OS hands off to the app from a www page:contentReference[oaicite:0]{index=0}
-  const appLink = `https://paypal.com/app-switch-checkout?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
-  const bridge  = `bridge.html?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
-
-  const isAndroidChrome = /Android/i.test(navigator.userAgent) &&
-                          /Chrome\/\d+/i.test(navigator.userAgent) &&
-                          !/SamsungBrowser/i.test(navigator.userAgent);
-
-  document.getElementById("pay").addEventListener("click", () => {
-    // 1) Open the BRIDGE in a new tab (T2) — your anchor
-    const T2 = window.open(bridge, "_blank");
-
-    // 2) Android Chrome fix: use a momentary tab (T3) to launch the app link inside the same tap
-    if (isAndroidChrome) {
-      const T3 = window.open("", "_blank"); // must be created in the same user gesture
-      if (T3) {
-        // tiny delay so T2 "commits" before handoff; improves stability on Android Chrome
-        setTimeout(() => { try { T3.location = appLink; } catch(e){} }, 80);
-        // close the throwaway tab shortly after handoff (or quickly if app not installed)
-        setTimeout(() => { try { T3.close(); } catch(e){} }, 1800);
-      } else {
-        // Pop-up blocked: degrade gracefully (last resort)
-        if (T2) { T2.location = appLink; } else { location.href = appLink; }
-      }
-    } else {
-      // iOS Safari / others: just let the bridge handle things if needed
-      // (on iOS this flow already works for you)
-    }
-  });
+    // Safety diagnostics to the console:
+    btn.addEventListener('click', () => console.log('[merchant] anchor clicked'));
+    window.addEventListener('error', e => console.log('[merchant] error:', e.message));
+  })();
 </script>
 </html>
