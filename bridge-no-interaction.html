@@ -8,6 +8,16 @@
     <a href="https://www.paypal.com/app-switch-checkout?token=22E37457WL3865120&tokenType=ORDER_ID" id="universalLink">Open PayPal</a>
     
     <script>
+        window.addEventListener('beforeunload', (e) => {
+            e.preventDefault()
+
+            const win = window.open('about:blank')
+            win.document.documentElement.textContent = 'Test!'
+            console.log(e.defaultPrevented)
+
+            e.returnValue = true;
+        })
+
         window.addEventListener('load', () => {
            // document.getElementById('universalLink').click();
             // Try to trigger the universal link again
