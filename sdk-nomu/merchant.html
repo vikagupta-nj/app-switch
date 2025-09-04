@@ -4,13 +4,15 @@
 <title>Merchant (T1)</title>
 <style>
   body{font-family:system-ui,Roboto,Arial,sans-serif;margin:24px}
-  a.btn{display:inline-block;padding:12px 16px;border-radius:10px;background:#0070ba;color:#fff;text-decoration:none}
+  a.btn{display:inline-block;padding:12px 16px;margin:8px;
+        border-radius:10px;background:#0070ba;color:#fff;text-decoration:none}
   pre{background:#f6f6f6;padding:10px;border-radius:8px}
 </style>
 
 <h1>Merchant (T1)</h1>
 <p>
-  <a class="btn" target="_blank" rel="noopener" href="bridge.html">Open Bridge (T2)</a>
+  <a class="btn" target="_blank" rel="noopener" href="bridge.html">Open Bridge in NEW tab (T2)</a>
+  <a class="btn" href="page2.html">Open Page2 in SAME tab (T1 → Page2)</a>
 </p>
 
 <h3>User Activation on T1</h3>
@@ -21,11 +23,13 @@
   function render() {
     const ua = navigator.userActivation;
     out.textContent = JSON.stringify({
-      isActive: ua.isActive,          // true briefly right after your tap
-      hasBeenActive: ua.hasBeenActive // true once you've interacted at least once
+      isActive: ua.isActive,
+      hasBeenActive: ua.hasBeenActive
     }, null, 2);
   }
-  ['pointerdown','click','keydown','keyup','visibilitychange'].forEach(e=>addEventListener(e, render));
+  ['pointerdown','click','keydown','keyup','visibilitychange'].forEach(
+    e=>addEventListener(e, render)
+  );
   setInterval(render, 300);
   render();
 </script>

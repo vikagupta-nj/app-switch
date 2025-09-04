@@ -5,33 +5,27 @@
 <style>
   body{font-family:system-ui,Roboto,Arial,sans-serif;margin:24px}
   pre{background:#f6f6f6;padding:10px;border-radius:8px}
-  .note{opacity:.75}
 </style>
 
-<h1>Bridge (T2)</h1>
-<p class="note">Opened in a new tab from T1. This tab starts without transient user activation.</p>
-
-<h3>User Activation on T2</h3>
+<h1>Bridge (T2, new tab)</h1>
+<p>This page shows that TUA is gone when opened in a new tab.</p>
 <pre id="ua"></pre>
 
 <script>
   const ua0 = {
     isActive: navigator.userActivation.isActive,
     hasBeenActive: navigator.userActivation.hasBeenActive
-  }; // snapshot on first script tick
-
+  };
   const out = document.getElementById('ua');
   function render() {
-    const ua = navigator.userActivation;
     out.textContent = JSON.stringify({
-      firstTick: ua0,                 // expected: both false
+      firstTick: ua0,
       current: {
-        isActive: ua.isActive,        // stays false until you interact on T2
-        hasBeenActive: ua.hasBeenActive
+        isActive: navigator.userActivation.isActive,
+        hasBeenActive: navigator.userActivation.hasBeenActive
       }
     }, null, 2);
   }
-  ['pointerdown','click','keydown','keyup','visibilitychange'].forEach(e=>addEventListener(e, render));
-  setInterval(render, 300);
   render();
+  setInterval(render, 300);
 </script>
