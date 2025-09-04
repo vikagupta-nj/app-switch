@@ -154,7 +154,9 @@
 
       console.log('post message!')
       
-      result.postMessage('popup')
+      setTimeout(() => {
+        result.postMessage('popup')
+      }, 1000)
     })
   </script>
 
