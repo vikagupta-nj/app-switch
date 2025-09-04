@@ -2,65 +2,45 @@
 <html lang="en">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Bridge • App Switch (Sim)</title>
+<title>Bridge • App Switch</title>
 <style>
   :root { color-scheme: light dark; }
-  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding:20px; }
-  .card { margin:auto; max-width:520px; border:1px solid #ddd; border-radius:16px; padding:18px; }
-  h1 { margin:0 0 8px; font-size:22px; }
-  p  { margin:8px 0; line-height:1.4; }
-  button { margin-top:12px; width:100%; padding:12px 14px; border:0; border-radius:12px; font-size:16px; }
-  .primary { background:#0070ba; color:#fff; }
-  .hint { opacity:.7; font-size:14px; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding:20px }
+  .card { max-width:520px; margin:auto; border:1px solid #ddd; border-radius:16px; padding:18px }
+  h1 { margin:0 0 8px; font-size:22px } p{ margin:8px 0; line-height:1.4 }
+  button { margin-top:12px; width:100%; padding:12px 14px; border:0; border-radius:12px; font-size:16px }
+  .primary { background:#0070ba; color:#fff } .hint { opacity:.7; font-size:14px }
 </style>
 
 <div class="card">
   <h1>Bridge</h1>
-  <p class="hint">This tab (T2) stays open while the PayPal app handles approval. When you return, we’ll resume.</p>
-  <p id="status">Waiting…</p>
-  <button id="openApp" class="primary" hidden>Open in PayPal app</button>
+  <p class="hint">This tab stays open while the PayPal app runs.</p>
+  <p id="status">Launching PayPal app…</p>
+  <button id="relaunch" class="primary" hidden>Open in PayPal app</button>
 </div>
 
 <script>
-  // Keep T2 from auto "back" snap
+  const q = new URLSearchParams(location.search);
+  const token   = q.get("token")   || "EC-EXAMPLE";
+  const sdkMeta = q.get("sdkMeta") || "ENCODED_SDK_META";
+
+  // HLD: use a non-www HTTPS app link so OS hands off from a www page:contentReference[oaicite:1]{index=1}
+  const appLink = `https://paypal.com/app-switch-checkout?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
+
+  // Prevent Chrome from "snapping back" in history
   history.replaceState(null, "", location.href);
   history.pushState(null, "", location.href);
   addEventListener("popstate", () => history.pushState(null, "", location.href));
 
-  const q = new URLSearchParams(location.search);
-  const token   = q.get("token")   || "EC-EXAMPLE";
-  const sdkMeta = q.get("sdkMeta") || "ENCODED_SDK_META";
-  const appLink = `https://paypal.com/app-switch-checkout?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
+  // Launch immediately while transient activation is alive
+  try { location.assign(appLink); } catch (e) {}
 
-  const isAndroidChrome = /Android/i.test(navigator.userAgent) &&
-                          /Chrome\/\d+/i.test(navigator.userAgent) &&
-                          !/SamsungBrowser/i.test(navigator.userAgent);
-
-  // If user returns to T2, resume (stub: you’d poll token & route to merchant)
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      document.getElementById("status").textContent = "Bridge focused — checking status…";
-      // TODO: fetch('/status?token=...') then redirect to merchant return/cancel URL
-    }
-  });
-
-  // Show a manual “Open in PayPal app” button in case app didn’t open
+  // If nothing happened (app not installed), show a manual relaunch button
   setTimeout(() => {
-    const btn = document.getElementById("openApp");
+    const btn = document.getElementById("relaunch");
     btn.hidden = false;
-    btn.onclick = () => {
-      if (isAndroidChrome) {
-        const T3 = window.open("", "_blank");          // must be in a user gesture
-        if (T3) {
-          try { T3.location = appLink; } catch(e) {}
-          setTimeout(() => { try { T3.close(); } catch(e){} }, 1800);
-        } else {
-          location.href = appLink;                     // last resort
-        }
-      } else {
-        location.href = appLink;                       // iOS/etc.
-      }
-    };
-  }, 1400);
+    btn.onclick = () => { location.assign(appLink); };
+    document.getElementById("status").textContent = "Tap to open PayPal app";
+  }, 1200);
 </script>
 </html>
