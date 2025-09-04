@@ -5,54 +5,61 @@
 <title>Bridge • App Switch</title>
 <style>
   :root { color-scheme: light dark; }
-  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding:20px }
-  .card { max-width:520px; margin:auto; border:1px solid #ddd; border-radius:16px; padding:18px }
-  h1 { margin:0 0 8px; font-size:22px } p{ margin:8px 0; line-height:1.4 }
-  button { margin-top:12px; width:100%; padding:12px 14px; border:0; border-radius:12px; font-size:16px }
-  .primary { background:#0070ba; color:#fff } .hint { opacity:.7; font-size:14px }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  main { min-height: 100svh; display:grid; place-items:center; padding:24px; }
+  a.btn {
+    display:block; text-align:center; text-decoration:none;
+    padding:16px 20px; border-radius:14px; font-size:18px;
+    background:#0070ba; color:#fff; width:100%; max-width:420px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  p { max-width:520px; opacity:.75; line-height:1.4; text-align:center; margin-top:12px; }
 </style>
 
-<div class="card">
-  <h1>Bridge</h1>
-  <p class="hint">This tab stays open while the PayPal app runs.</p>
-  <p id="status">Launching PayPal app…</p>
-  <button id="retry" class="primary" hidden>Open in PayPal app</button>
-</div>
+<main>
+  <div>
+    <!-- The anchor itself performs the user-gesture navigation to intent:// -->
+    <a id="openApp" class="btn" href="#">Continue in PayPal app</a>
+    <p>If this doesn’t open the app, you likely don’t have the PayPal app (or supported links) enabled.</p>
+  </div>
+</main>
 
 <script>
+  // Build the HTTPS app link (non-www). Use whichever token you have.
   const q = new URLSearchParams(location.search);
-  const token   = q.get("token")   || "EC-EXAMPLE";
+  const token   = q.get("token");          // e.g. EC-...
+  const baToken = q.get("ba_token");       // e.g. BA-...
   const sdkMeta = q.get("sdkMeta") || "ENCODED_SDK_META";
 
-  // Base app link (non-www, required by HLD):contentReference[oaicite:0]{index=0}
-  const redirectUrl =
-    `https://paypal.com/app-switch-checkout?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
+  const base = "https://paypal.com/app-switch-checkout";
+  const qp   = new URLSearchParams();
+  if (baToken) qp.set("ba_token", baToken);
+  if (token)   qp.set("token",    token);
+  qp.set("sdkMeta", sdkMeta);
+  const redirectUrl = `${base}?${qp.toString()}`;
 
-  // Build intent:// URL targeting PayPal app
+  // Your exact intent builder
   function getIntentUrl(redirectUrl) {
     const encodedRedirect = redirectUrl.replace(/^https?:\/\//, '');
     const encodedFallback = encodeURIComponent(redirectUrl);
     return `intent://${encodedRedirect}#Intent;scheme=https;package=com.paypal.android.p2pmobile;S.browser_fallback_url=${encodedFallback};end;`;
   }
 
-  // History hardening to keep bridge alive
+  // Keep this bridge tab committed in history (helps survival after app switch)
   history.replaceState(null, "", location.href);
   history.pushState(null, "", location.href);
   addEventListener("popstate", () => history.pushState(null, "", location.href));
 
-  function launch() {
-    location.href = getIntentUrl(redirectUrl);
-  }
+  // Wire the anchor to the intent URL so the TAP triggers the navigation
+  const a = document.getElementById("openApp");
+  const intentUrl = getIntentUrl(redirectUrl);
+  a.setAttribute("href", intentUrl);
 
-  // Fire immediately
-  try { launch(); } catch (_) {}
-
-  // Show manual retry if app not installed or handoff blocked
-  setTimeout(() => {
-    const btn = document.getElementById("retry");
-    btn.hidden = false;
-    btn.onclick = launch;
-    document.getElementById("status").textContent = "Tap to open PayPal app";
-  }, 1200);
+  // Optional: also try to open on Enter/Space for accessibility
+  a.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      // Let the default click nav happen
+    }
+  });
 </script>
 </html>
