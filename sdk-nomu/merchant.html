@@ -22,7 +22,7 @@
   let childRef = null;
   let awaiting = false;
 
-  // 1) Button click → open about:blank (T2), then navigate it to page2.html
+  // 1) Button click → open about:blank (T2), then navigate it to bridge.html
   document.getElementById("start").addEventListener("click", () => {
     log("Opening about:blank (T2)...");
     childRef = window.open("", "_blank", "noopener"); // created within user gesture
@@ -32,9 +32,9 @@
       return;
     }
 
-    // Navigate the new tab to explicit page2.html (keeps flow clear)
-    log("Navigating T2 → page2.html");
-    try { childRef.location = "page2.html"; } catch (e) {}
+    // Navigate the new tab to explicit bridge.html (keeps flow clear)
+    log("Navigating T2 → bridge.html");
+    try { childRef.location = "bridge.html"; } catch (e) {}
 
     // Start awaiting a message from T2
     awaiting = true;
