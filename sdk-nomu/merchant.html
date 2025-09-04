@@ -1,80 +1,61 @@
-<!doctype html>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Merchant (T1)</title>
-<style>
-  body{font-family:system-ui,Roboto,Arial,sans-serif;margin:24px}
-  button,a.btn{display:inline-block;padding:12px 16px;border-radius:10px;background:#0070ba;color:#fff;border:0;font-size:16px;text-decoration:none}
-  .row{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
-  .log{white-space:pre-wrap;background:#f6f6f6;padding:10px;border-radius:8px;margin-top:12px}
-  #openApp{display:none}
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page 1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            text-align: center;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #007cba;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005a87;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Page 1 - Main</h1>
+    <button id="openPage2">Open Page 2</button>
+    <div class="status" id="status">Ready</div>
 
-<h1>Merchant (T1)</h1>
-<div class="row">
-  <button id="start">Open Page 2 → receive eligibility → close T2</button>
-  <a id="openApp" class="btn" href="#">Open in PayPal app</a>
-</div>
-<div class="log" id="log"></div>
+    <script>
+        let page2Window = null;
+        const channel = new BroadcastChannel('test-channel');
 
-<script>
-  // Regular HTTPS app link (as requested)
-  const appLink = "https://www.paypal.com/app-switch-checkout?ba_token=BA-EXAMPLE-123";
+        // Listen for messages from Page 2
+        channel.addEventListener('message', (event) => {
+            document.getElementById('status').textContent = 'Message received from Page 2';
+            
+            // Open app link
+            window.location.href = 'https://www.paypal.com/app-switch-checkout';
+            
+            // Close Page 2
+            if (page2Window && !page2Window.closed) {
+                page2Window.close();
+            }
+        });
 
-  const logBox = document.getElementById("log");
-  const log = (m) => (logBox.textContent += `${new Date().toLocaleTimeString()}  ${m}\n`);
-
-  // One-time nonce to bind Page2→Page1 message
-  const nonce = Math.random().toString(36).slice(2);
-
-  let childRef = null;
-  let awaiting = false;
-
-  // Button to open Page 2
-  document.getElementById("start").addEventListener("click", () => {
-    log("Opening about:blank (T2) without noopener…");
-    // IMPORTANT: no "noopener" here, or window.opener will be null in Page 2
-    childRef = window.open("", "_blank");
-    if (!childRef) {
-      log("Popup blocked — cannot open Page 2.");
-      // You can still allow manual app open via button:
-      showOpenAppButton();
-      return;
-    }
-    log("Navigating T2 → page2.html");
-    try { childRef.location = `page2.html?nonce=${encodeURIComponent(nonce)}`; } catch (e) {}
-    awaiting = true;
-
-    // Guard: if no message arrives, reveal manual “Open app” button
-    setTimeout(() => {
-      if (awaiting) {
-        log("No eligibility message received yet.");
-        showOpenAppButton();
-      }
-    }, 2000);
-  });
-
-  // Receive eligibility from T2
-  window.addEventListener("message", (ev) => {
-    // Expect same-origin page2.html
-    if (ev.origin !== location.origin) {
-      log(`Ignored message from unexpected origin: ${ev.origin}`);
-      return;
-    }
-    const d = ev.data || {};
-    if (d.type === "pp_elig" && d.eligible === true && d.nonce === nonce) {
-      awaiting = false;
-      log("Eligibility received from T2. Closing T2…");
-      try { if (childRef && !childRef.closed) childRef.close(); } catch (e) {}
-      // Now we need a user gesture in THIS tab for Android app switch.
-      showOpenAppButton(true);
-    }
-  });
-
-  function showOpenAppButton(autoFocus=false){
-    const btn = document.getElementById("openApp");
-    btn.href = appLink; // real link so the user’s tap is a proper gesture
-    btn.style.display = "inline-block";
-    if (autoFocus) btn.focus();
-  }
-</script>
+        // Open Page 2
+        document.getElementById('openPage2').addEventListener('click', () => {
+            document.getElementById('status').textContent = 'Opening Page 2...';
+            page2Window = window.open('page2.html', 'page2', 'width=400,height=300');
+        });
+    </script>
+</body>
+</html>

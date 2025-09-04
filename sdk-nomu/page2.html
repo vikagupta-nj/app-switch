@@ -1,26 +1,39 @@
-<!doctype html>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Page 2 (T2)</title>
-<style>
-  body{font-family:system-ui,Roboto,Arial,sans-serif;margin:24px}
-  .box{background:#f6f6f6;padding:10px;border-radius:8px}
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page 2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            text-align: center;
+        }
+        .status {
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Page 2</h1>
+    <div class="status" id="status">Loading...</div>
 
-<h1>Page 2 (T2)</h1>
-<p class="box">Sending eligibility to Page 1 and closing this tab…</p>
+    <script>
+        const channel = new BroadcastChannel('test-channel');
 
-<script>
-  const params = new URLSearchParams(location.search);
-  const nonce = params.get("nonce") || "";
-
-  try {
-    if (window.opener) {
-      // Send message to Page 1 (same-origin)
-      window.opener.postMessage({ type:"pp_elig", eligible:true, nonce }, window.location.origin);
-    }
-  } catch(e){}
-
-  // Try to close; parent will also close us after receiving the message
-  setTimeout(() => { try { window.close(); } catch(e){} }, 0);
-</script>
+        // Send message to Page 1 on load
+        window.addEventListener('load', () => {
+            document.getElementById('status').textContent = 'Sending message to Page 1...';
+            
+            channel.postMessage({
+                type: 'ready',
+                message: 'Page 2 loaded'
+            });
+            
+            document.getElementById('status').textContent = 'Message sent!';
+        });
+    </script>
+</body>
+</html>
