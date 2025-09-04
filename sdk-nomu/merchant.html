@@ -1,36 +1,59 @@
-<button id="pay">Pay with PayPal</button>
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Merchant • Pay with PayPal (Sim)</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  main { min-height: 100svh; display:grid; place-items:center; padding:24px; }
+  button {
+    -webkit-tap-highlight-color: transparent;
+    appearance:none; font-size:18px; border:0; border-radius:14px;
+    padding:16px 20px; background:#0070ba; color:#fff; width:100%; max-width:420px;
+  }
+  p { max-width:520px; line-height:1.4; opacity:.75; text-align:center; }
+</style>
+<main>
+  <div>
+    <button id="pay">Pay with PayPal</button>
+    <p>Opens a bridge tab (T2) and launches the PayPal app from a tiny, disposable tab to keep T2 open on Android Chrome.</p>
+  </div>
+</main>
+
 <script>
+  // Minimal config (replace with real values)
   const token   = "EC-EXAMPLE";
   const sdkMeta = "ENCODED_SDK_META";
-  // HLD: use **non-www** app link (https://paypal.com/...) to trigger OS handoff from a www page:contentReference[oaicite:0]{index=0}
+
+  // HLD pattern: non-www HTTPS app link so OS hands off to the app from a www page:contentReference[oaicite:0]{index=0}
   const appLink = `https://paypal.com/app-switch-checkout?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
   const bridge  = `bridge.html?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
 
-  const isAndroidChrome = /Android/i.test(navigator.userAgent) && /Chrome\/\d+/i.test(navigator.userAgent) && !/SamsungBrowser/i.test(navigator.userAgent);
+  const isAndroidChrome = /Android/i.test(navigator.userAgent) &&
+                          /Chrome\/\d+/i.test(navigator.userAgent) &&
+                          !/SamsungBrowser/i.test(navigator.userAgent);
 
-  document.getElementById('pay').addEventListener('click', () => {
-    // Open the bridge in T2 (anchor tab per HLD):contentReference[oaicite:1]{index=1}
-    const T2 = window.open(bridge, "_blank", "noopener");
+  document.getElementById("pay").addEventListener("click", () => {
+    // 1) Open the BRIDGE in a new tab (T2) — your anchor
+    const T2 = window.open(bridge, "_blank");
 
+    // 2) Android Chrome fix: use a momentary tab (T3) to launch the app link inside the same tap
     if (isAndroidChrome) {
-      // Android Chrome: launch app link in a disposable tab (T3) within the SAME gesture
-      const T3 = window.open("about:blank", "_blank", "noopener");
+      const T3 = window.open("", "_blank"); // must be created in the same user gesture
       if (T3) {
-        // Tiny delay so T2 commits before we hand off; reduces snap-back weirdness
-        setTimeout(() => { try { T3.location = appLink; } catch(_) {} }, 80);
-        // Close the throwaway tab after handoff (or quickly if app not installed)
-        setTimeout(() => { try { T3.close(); } catch(_) {} }, 1800);
+        // tiny delay so T2 "commits" before handoff; improves stability on Android Chrome
+        setTimeout(() => { try { T3.location = appLink; } catch(e){} }, 80);
+        // close the throwaway tab shortly after handoff (or quickly if app not installed)
+        setTimeout(() => { try { T3.close(); } catch(e){} }, 1800);
       } else {
-        // Popup blocked → last-resort fallback
+        // Pop-up blocked: degrade gracefully (last resort)
         if (T2) { T2.location = appLink; } else { location.href = appLink; }
       }
     } else {
-      // iOS Safari and the rest: normal direct launch works fine
-      if (T2) {
-        setTimeout(() => { T2.postMessage({ launch: "app" }, "*"); }, 50);
-      } else {
-        location.href = appLink;
-      }
+      // iOS Safari / others: just let the bridge handle things if needed
+      // (on iOS this flow already works for you)
     }
   });
 </script>
+</html>
