@@ -16,7 +16,7 @@
   <h1>Bridge</h1>
   <p class="hint">This tab stays open while the PayPal app runs.</p>
   <p id="status">Launching PayPal app…</p>
-  <button id="relaunch" class="primary" hidden>Open in PayPal app</button>
+  <button id="retry" class="primary" hidden>Open in PayPal app</button>
 </div>
 
 <script>
@@ -24,22 +24,34 @@
   const token   = q.get("token")   || "EC-EXAMPLE";
   const sdkMeta = q.get("sdkMeta") || "ENCODED_SDK_META";
 
-  // HLD: use a non-www HTTPS app link so OS hands off from a www page:contentReference[oaicite:1]{index=1}
-  const appLink = `https://paypal.com/app-switch-checkout?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
+  // Base app link (non-www, required by HLD):contentReference[oaicite:0]{index=0}
+  const redirectUrl =
+    `https://paypal.com/app-switch-checkout?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
 
-  // Prevent Chrome from "snapping back" in history
+  // Build intent:// URL targeting PayPal app
+  function getIntentUrl(redirectUrl) {
+    const encodedRedirect = redirectUrl.replace(/^https?:\/\//, '');
+    const encodedFallback = encodeURIComponent(redirectUrl);
+    return `intent://${encodedRedirect}#Intent;scheme=https;package=com.paypal.android.p2pmobile;S.browser_fallback_url=${encodedFallback};end;`;
+  }
+
+  // History hardening to keep bridge alive
   history.replaceState(null, "", location.href);
   history.pushState(null, "", location.href);
   addEventListener("popstate", () => history.pushState(null, "", location.href));
 
-  // Launch immediately while transient activation is alive
-  try { location.assign(appLink); } catch (e) {}
+  function launch() {
+    location.href = getIntentUrl(redirectUrl);
+  }
 
-  // If nothing happened (app not installed), show a manual relaunch button
+  // Fire immediately
+  try { launch(); } catch (_) {}
+
+  // Show manual retry if app not installed or handoff blocked
   setTimeout(() => {
-    const btn = document.getElementById("relaunch");
+    const btn = document.getElementById("retry");
     btn.hidden = false;
-    btn.onclick = () => { location.assign(appLink); };
+    btn.onclick = launch;
     document.getElementById("status").textContent = "Tap to open PayPal app";
   }, 1200);
 </script>
