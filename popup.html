@@ -8,7 +8,7 @@
 <body>    
     <script>
         window.addEventListener('message', (e) => {
-            console.log('message', e)
+            console.log('message', e, navigator.userActivation.hasBeenActive, navigator.userActivation.isActive)
 
             window.location.replace("https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228")
         })
