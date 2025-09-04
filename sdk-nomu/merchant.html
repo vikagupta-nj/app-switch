@@ -1,41 +1,31 @@
 <!doctype html>
-<html lang="en">
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Merchant • Minimal Launcher</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Merchant (T1)</title>
 <style>
-  :root { color-scheme: light dark; }
-  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-  main { min-height: 100svh; display:grid; place-items:center; padding:24px; }
-  a.button {
-    display:block; text-align:center; text-decoration:none;
-    padding:16px 20px; border-radius:14px; font-size:18px;
-    background:#0070ba; color:#fff; width:100%; max-width:420px;
-    -webkit-tap-highlight-color: transparent;
-  }
-  p { max-width:520px; opacity:.75; line-height:1.4; text-align:center; margin-top:12px; }
+  body{font-family:system-ui,Roboto,Arial,sans-serif;margin:24px}
+  a.btn{display:inline-block;padding:12px 16px;border-radius:10px;background:#0070ba;color:#fff;text-decoration:none}
+  pre{background:#f6f6f6;padding:10px;border-radius:8px}
 </style>
-<main>
-  <!-- Use a real link so the browser treats it as a user gesture to open a new tab -->
-  <a id="pay" class="button" target="_blank" rel="noopener"
-     href="bridge.html?token=EC-EXAMPLE&sdkMeta=ENCODED_SDK_META">
-     Pay with PayPal
-  </a>
-  <p>If a new tab didn’t open, your browser blocked popups. Tap and hold, then “Open in new tab”.</p>
-</main>
+
+<h1>Merchant (T1)</h1>
+<p>
+  <a class="btn" target="_blank" rel="noopener" href="bridge.html">Open Bridge (T2)</a>
+</p>
+
+<h3>User Activation on T1</h3>
+<pre id="ua"></pre>
 
 <script>
-  // Optional: JS fallback if you must compute the bridge URL dynamically.
-  // Keeps a SINGLE popup total (one tab, allowed). 
-  (function(){
-    const btn = document.getElementById('pay');
-    // If you need to build the URL at runtime, do it here:
-    // const token = 'EC-EXAMPLE', sdkMeta = 'ENCODED_SDK_META';
-    // btn.href = `bridge.html?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
-
-    // Safety diagnostics to the console:
-    btn.addEventListener('click', () => console.log('[merchant] anchor clicked'));
-    window.addEventListener('error', e => console.log('[merchant] error:', e.message));
-  })();
+  const out = document.getElementById('ua');
+  function render() {
+    const ua = navigator.userActivation;
+    out.textContent = JSON.stringify({
+      isActive: ua.isActive,          // true briefly right after your tap
+      hasBeenActive: ua.hasBeenActive // true once you've interacted at least once
+    }, null, 2);
+  }
+  ['pointerdown','click','keydown','keyup','visibilitychange'].forEach(e=>addEventListener(e, render));
+  setInterval(render, 300);
+  render();
 </script>
-</html>
