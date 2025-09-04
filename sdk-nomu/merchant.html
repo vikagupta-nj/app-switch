@@ -4,63 +4,77 @@
 <title>Merchant (T1)</title>
 <style>
   body{font-family:system-ui,Roboto,Arial,sans-serif;margin:24px}
-  button{padding:12px 16px;border-radius:10px;background:#0070ba;color:#fff;border:0;font-size:16px}
+  button,a.btn{display:inline-block;padding:12px 16px;border-radius:10px;background:#0070ba;color:#fff;border:0;font-size:16px;text-decoration:none}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
   .log{white-space:pre-wrap;background:#f6f6f6;padding:10px;border-radius:8px;margin-top:12px}
+  #openApp{display:none}
 </style>
 
 <h1>Merchant (T1)</h1>
-<button id="start">Open Page 2 → receive eligibility → close T2 → open app link</button>
+<div class="row">
+  <button id="start">Open Page 2 → receive eligibility → close T2</button>
+  <a id="openApp" class="btn" href="#">Open in PayPal app</a>
+</div>
 <div class="log" id="log"></div>
 
 <script>
-  // Regular HTTPS app link (no intent). Swap ba_token/token as needed.
+  // Regular HTTPS app link (as requested)
   const appLink = "https://www.paypal.com/app-switch-checkout?ba_token=BA-EXAMPLE-123";
 
   const logBox = document.getElementById("log");
   const log = (m) => (logBox.textContent += `${new Date().toLocaleTimeString()}  ${m}\n`);
 
+  // One-time nonce to bind Page2→Page1 message
+  const nonce = Math.random().toString(36).slice(2);
+
   let childRef = null;
   let awaiting = false;
 
-  // 1) Button click → open about:blank (T2), then navigate it to bridge.html
+  // Button to open Page 2
   document.getElementById("start").addEventListener("click", () => {
-    log("Opening about:blank (T2)...");
-    childRef = window.open("", "_blank", "noopener"); // created within user gesture
+    log("Opening about:blank (T2) without noopener…");
+    // IMPORTANT: no "noopener" here, or window.opener will be null in Page 2
+    childRef = window.open("", "_blank");
     if (!childRef) {
-      log("Popup blocked — opening app link from T1.");
-      location.href = appLink;
+      log("Popup blocked — cannot open Page 2.");
+      // You can still allow manual app open via button:
+      showOpenAppButton();
       return;
     }
-
-    // Navigate the new tab to explicit bridge.html (keeps flow clear)
-    log("Navigating T2 → bridge.html");
-    try { childRef.location = "bridge.html"; } catch (e) {}
-
-    // Start awaiting a message from T2
+    log("Navigating T2 → page2.html");
+    try { childRef.location = `page2.html?nonce=${encodeURIComponent(nonce)}`; } catch (e) {}
     awaiting = true;
 
-    // Optional guard: if no message arrives quickly, proceed anyway
+    // Guard: if no message arrives, reveal manual “Open app” button
     setTimeout(() => {
       if (awaiting) {
-        log("No eligibility message yet — proceeding to open app link from T1.");
-        try { if (childRef && !childRef.closed) childRef.close(); } catch (e) {}
-        location.href = appLink;
+        log("No eligibility message received yet.");
+        showOpenAppButton();
       }
     }, 2000);
   });
 
-  // 2) Receive eligibility from Page 2 → close T2 → 3) open app link
+  // Receive eligibility from T2
   window.addEventListener("message", (ev) => {
-    // Accept same-origin (recommended). If testing cross-origin, relax as needed.
+    // Expect same-origin page2.html
     if (ev.origin !== location.origin) {
       log(`Ignored message from unexpected origin: ${ev.origin}`);
       return;
     }
-    if (ev.data && ev.data.type === "pp_elig" && ev.data.eligible === true) {
+    const d = ev.data || {};
+    if (d.type === "pp_elig" && d.eligible === true && d.nonce === nonce) {
       awaiting = false;
-      log("Eligibility received from T2. Closing T2 and opening app link from T1…");
+      log("Eligibility received from T2. Closing T2…");
       try { if (childRef && !childRef.closed) childRef.close(); } catch (e) {}
-      location.href = appLink;
+      // Now we need a user gesture in THIS tab for Android app switch.
+      showOpenAppButton(true);
     }
   });
+
+  function showOpenAppButton(autoFocus=false){
+    const btn = document.getElementById("openApp");
+    btn.href = appLink; // real link so the user’s tap is a proper gesture
+    btn.style.display = "inline-block";
+    if (autoFocus) btn.focus();
+  }
 </script>
