@@ -1,31 +1,21 @@
 <!doctype html>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Bridge (T2)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Page 2 (T2)</title>
 <style>
   body{font-family:system-ui,Roboto,Arial,sans-serif;margin:24px}
-  pre{background:#f6f6f6;padding:10px;border-radius:8px}
+  .box{background:#f6f6f6;padding:10px;border-radius:8px}
 </style>
 
-<h1>Bridge (T2, new tab)</h1>
-<p>This page shows that TUA is gone when opened in a new tab.</p>
-<pre id="ua"></pre>
+<h1>Page 2 (T2)</h1>
+<p class="box">Sending eligibility to Page 1 and closing this tab…</p>
 
 <script>
-  const ua0 = {
-    isActive: navigator.userActivation.isActive,
-    hasBeenActive: navigator.userActivation.hasBeenActive
-  };
-  const out = document.getElementById('ua');
-  function render() {
-    out.textContent = JSON.stringify({
-      firstTick: ua0,
-      current: {
-        isActive: navigator.userActivation.isActive,
-        hasBeenActive: navigator.userActivation.hasBeenActive
-      }
-    }, null, 2);
-  }
-  render();
-  setInterval(render, 300);
+  // Immediately notify opener (Page 1), then close T2.
+  try {
+    if (window.opener) {
+      window.opener.postMessage({ type: "pp_elig", eligible: true }, window.location.origin);
+    }
+  } catch (e) {}
+  setTimeout(() => { try { window.close(); } catch (e) {} }, 0);
 </script>

@@ -1,35 +1,66 @@
 <!doctype html>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Merchant (T1)</title>
 <style>
   body{font-family:system-ui,Roboto,Arial,sans-serif;margin:24px}
-  a.btn{display:inline-block;padding:12px 16px;margin:8px;
-        border-radius:10px;background:#0070ba;color:#fff;text-decoration:none}
-  pre{background:#f6f6f6;padding:10px;border-radius:8px}
+  button{padding:12px 16px;border-radius:10px;background:#0070ba;color:#fff;border:0;font-size:16px}
+  .log{white-space:pre-wrap;background:#f6f6f6;padding:10px;border-radius:8px;margin-top:12px}
 </style>
 
 <h1>Merchant (T1)</h1>
-<p>
-  <a class="btn" target="_blank" rel="noopener" href="bridge.html">Open Bridge in NEW tab (T2)</a>
-  <a class="btn" href="bridge.html">Open Page2 in SAME tab (T1 → Page2)</a>
-</p>
-
-<h3>User Activation on T1</h3>
-<pre id="ua"></pre>
+<button id="start">Open Page 2 → receive eligibility → close T2 → open app link</button>
+<div class="log" id="log"></div>
 
 <script>
-  const out = document.getElementById('ua');
-  function render() {
-    const ua = navigator.userActivation;
-    out.textContent = JSON.stringify({
-      isActive: ua.isActive,
-      hasBeenActive: ua.hasBeenActive
-    }, null, 2);
-  }
-  ['pointerdown','click','keydown','keyup','visibilitychange'].forEach(
-    e=>addEventListener(e, render)
-  );
-  setInterval(render, 300);
-  render();
+  // Regular HTTPS app link (no intent). Swap ba_token/token as needed.
+  const appLink = "https://www.paypal.com/app-switch-checkout?ba_token=BA-EXAMPLE-123";
+
+  const logBox = document.getElementById("log");
+  const log = (m) => (logBox.textContent += `${new Date().toLocaleTimeString()}  ${m}\n`);
+
+  let childRef = null;
+  let awaiting = false;
+
+  // 1) Button click → open about:blank (T2), then navigate it to page2.html
+  document.getElementById("start").addEventListener("click", () => {
+    log("Opening about:blank (T2)...");
+    childRef = window.open("", "_blank", "noopener"); // created within user gesture
+    if (!childRef) {
+      log("Popup blocked — opening app link from T1.");
+      location.href = appLink;
+      return;
+    }
+
+    // Navigate the new tab to explicit page2.html (keeps flow clear)
+    log("Navigating T2 → page2.html");
+    try { childRef.location = "page2.html"; } catch (e) {}
+
+    // Start awaiting a message from T2
+    awaiting = true;
+
+    // Optional guard: if no message arrives quickly, proceed anyway
+    setTimeout(() => {
+      if (awaiting) {
+        log("No eligibility message yet — proceeding to open app link from T1.");
+        try { if (childRef && !childRef.closed) childRef.close(); } catch (e) {}
+        location.href = appLink;
+      }
+    }, 2000);
+  });
+
+  // 2) Receive eligibility from Page 2 → close T2 → 3) open app link
+  window.addEventListener("message", (ev) => {
+    // Accept same-origin (recommended). If testing cross-origin, relax as needed.
+    if (ev.origin !== location.origin) {
+      log(`Ignored message from unexpected origin: ${ev.origin}`);
+      return;
+    }
+    if (ev.data && ev.data.type === "pp_elig" && ev.data.eligible === true) {
+      awaiting = false;
+      log("Eligibility received from T2. Closing T2 and opening app link from T1…");
+      try { if (childRef && !childRef.closed) childRef.close(); } catch (e) {}
+      location.href = appLink;
+    }
+  });
 </script>
