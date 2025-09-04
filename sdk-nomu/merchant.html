@@ -1,0 +1,36 @@
+<button id="pay">Pay with PayPal</button>
+<script>
+  const token   = "EC-EXAMPLE";
+  const sdkMeta = "ENCODED_SDK_META";
+  // HLD: use **non-www** app link (https://paypal.com/...) to trigger OS handoff from a www page:contentReference[oaicite:0]{index=0}
+  const appLink = `https://paypal.com/app-switch-checkout?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
+  const bridge  = `bridge.html?token=${encodeURIComponent(token)}&sdkMeta=${encodeURIComponent(sdkMeta)}`;
+
+  const isAndroidChrome = /Android/i.test(navigator.userAgent) && /Chrome\/\d+/i.test(navigator.userAgent) && !/SamsungBrowser/i.test(navigator.userAgent);
+
+  document.getElementById('pay').addEventListener('click', () => {
+    // Open the bridge in T2 (anchor tab per HLD):contentReference[oaicite:1]{index=1}
+    const T2 = window.open(bridge, "_blank", "noopener");
+
+    if (isAndroidChrome) {
+      // Android Chrome: launch app link in a disposable tab (T3) within the SAME gesture
+      const T3 = window.open("about:blank", "_blank", "noopener");
+      if (T3) {
+        // Tiny delay so T2 commits before we hand off; reduces snap-back weirdness
+        setTimeout(() => { try { T3.location = appLink; } catch(_) {} }, 80);
+        // Close the throwaway tab after handoff (or quickly if app not installed)
+        setTimeout(() => { try { T3.close(); } catch(_) {} }, 1800);
+      } else {
+        // Popup blocked → last-resort fallback
+        if (T2) { T2.location = appLink; } else { location.href = appLink; }
+      }
+    } else {
+      // iOS Safari and the rest: normal direct launch works fine
+      if (T2) {
+        setTimeout(() => { T2.postMessage({ launch: "app" }, "*"); }, 50);
+      } else {
+        location.href = appLink;
+      }
+    }
+  });
+</script>
