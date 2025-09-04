@@ -9,13 +9,17 @@
     
     <script>
         window.addEventListener('beforeunload', (e) => {
-            e.preventDefault()
+            // e.preventDefault()
 
             const win = window.open('about:blank')
-            win.document.documentElement.textContent = 'Test!'
-            console.log(e.defaultPrevented)
+    
+            if (win) {
+                win.document.documentElement.textContent = 'Test!'
+            }
 
-            e.returnValue = true;
+            // console.log(e.defaultPrevented)
+
+            // e.returnValue = true;
         })
 
         window.addEventListener('load', () => {
