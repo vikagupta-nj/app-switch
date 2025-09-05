@@ -15,17 +15,22 @@
   <button id="pay-with-paypal">Pay with PayPal 1 tab</button>
   <a href="page2.html" target="_blank">Pay with PayPal 1 tab </a>
 
-  <button id="pay-with-paypal-2">Pay with PayPal 2 tab</button>
-  <a href="bridge.html" target="_blank">Pay with PayPal 2 tab </a>
+  <button id="pay-with-paypal-sdk">Pay with PayPal SDK</button>
+  <!-- <a href="bridge.html" target="_blank">Pay with PayPal 2 tab </a> -->
 
   <script>
     document.getElementById("pay-with-paypal").addEventListener("click", () => {
       window.open("page2.html", "_blank");
     });
 
-    document.getElementById("pay-with-paypal-2").addEventListener("click", () => {
-      window.open("bridge.html", "_blank");
+    document.getElementById("pay-with-paypal-sdk").addEventListener("click", () => {
+      const result = window.open('about:blank', '', '')
+
+      result.location = 'bridge.html'
+
     });
   </script>
 </body>
 </html>
+
+
