@@ -1,21 +1,29 @@
 <!doctype html>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Page 2 (T2)</title>
-<style>
-  body{font-family:system-ui,Roboto,Arial,sans-serif;margin:24px}
-  .box{background:#f6f6f6;padding:10px;border-radius:8px}
-</style>
+<html lang="en">
 
-<h1>Page 2 (T2)</h1>
-<p class="box">Sending eligibility to Page 1 and closing this tab…</p>
-
-<script>
-  // Immediately notify opener (Page 1), then close T2.
-  try {
-    if (window.opener) {
-      window.opener.postMessage({ type: "pp_elig", eligible: true }, window.location.origin);
+<head>
+  <meta charset="utf-8" />
+  <title>PayPal App Switch</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 24px;
     }
-  } catch (e) {}
-  setTimeout(() => { try { window.close(); } catch (e) {} }, 0);
-</script>
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Bridge page</h1>
+  <p id="status">Attempting to open the PayPal app.</p>
+  <script>
+    window.location.href = "page2.html";
+  </script>
+</body>
+
+</html>

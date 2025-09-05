@@ -12,20 +12,19 @@
 <body>
   <h1>Merchant Checkout</h1>
 
-  <!-- In a real flow, token/returnUrl would be produced server-side -->
-  <button id="pay-with-paypal">Pay with PayPal</button>
-  <a href="page2.html" target="_blank">Pay with PayPal</a>
+  <button id="pay-with-paypal">Pay with PayPal 1 tab</button>
+  <a href="page2.html" target="_blank">Pay with PayPal 1 tab </a>
+
+  <button id="pay-with-paypal-2">Pay with PayPal 2 tab</button>
+  <a href="bridge.html" target="_blank">Pay with PayPal 2 tab </a>
 
   <script>
-    const PAYPAL_PAGE2_URL = "/page2.html"; // put your absolute URL if cross-origin
-    const token = "REPLACE_WITH_ORDER_TOKEN";
-    const returnUrl = location.href;
-
     document.getElementById("pay-with-paypal").addEventListener("click", () => {
-      // IMPORTANT: Use window.open INSIDE the click handler to create a "script-opened" tab.
-      // Chrome treats this as user-initiated; Page 2 can then attempt app switch + self-close.
-      const url = `${PAYPAL_PAGE2_URL}?token=${encodeURIComponent(token)}&return=${encodeURIComponent(returnUrl)}`;
       window.open("page2.html", "_blank");
+    });
+
+    document.getElementById("pay-with-paypal-2").addEventListener("click", () => {
+      window.open("bridge.html", "_blank");
     });
   </script>
 </body>
