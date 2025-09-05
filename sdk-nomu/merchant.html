@@ -1,63 +1,32 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page 1</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 50px;
-            text-align: center;
-        }
-        button {
-            padding: 15px 30px;
-            font-size: 18px;
-            background-color: #007cba;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #005a87;
-        }
-        .status {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #333;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <title>Merchant – Pay with PayPal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 24px; }
+    button { font-size: 16px; padding: 12px 16px; border-radius: 10px; }
+  </style>
 </head>
 <body>
-    <h1>Page 1 - Main</h1>
-    <button id="openPage2">Open Page 2</button>
-    <br><br>
-    <a href="https://www.paypal.com/app-switch-checkout" style="display: inline-block; padding: 15px 30px; font-size: 18px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px;">Direct App Link</a>
-    <div class="status" id="status">Ready</div>
+  <h1>Merchant Checkout</h1>
 
-    <script>
-        let page2Window = null;
-        const channel = new BroadcastChannel('test-channel');
+  <!-- In a real flow, token/returnUrl would be produced server-side -->
+  <button id="pay-with-paypal">Pay with PayPal</button>
+  <a href="page2.html" target="_blank">Pay with PayPal</a>
 
-        // Listen for messages from Page 2
-        channel.addEventListener('message', (event) => {
-            document.getElementById('status').textContent = 'Message received from Page 2';
-            
-            // Open app link
-            window.location.href = 'https://www.paypal.com/app-switch-checkout';
-            
-            // Close Page 2
-            if (page2Window && !page2Window.closed) {
-                page2Window.close();
-            }
-        });
+  <script>
+    const PAYPAL_PAGE2_URL = "/page2.html"; // put your absolute URL if cross-origin
+    const token = "REPLACE_WITH_ORDER_TOKEN";
+    const returnUrl = location.href;
 
-        // Open Page 2
-        document.getElementById('openPage2').addEventListener('click', () => {
-            document.getElementById('status').textContent = 'Opening Page 2...';
-            page2Window = window.open('page2.html', 'page2', 'width=400,height=300');
-        });
-    </script>
+    document.getElementById("pay-with-paypal").addEventListener("click", () => {
+      // IMPORTANT: Use window.open INSIDE the click handler to create a "script-opened" tab.
+      // Chrome treats this as user-initiated; Page 2 can then attempt app switch + self-close.
+      const url = `${PAYPAL_PAGE2_URL}?token=${encodeURIComponent(token)}&return=${encodeURIComponent(returnUrl)}`;
+      window.open("page2.html", "_blank");
+    });
+  </script>
 </body>
 </html>
