@@ -22,20 +22,13 @@
     //     const intentUrl = getIntentUrl('https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228')
 const intentUrl = "https://www.paypal.com/app-switch-checkout?ba_token=XYZ"
 
-    // --- core flow ---
-    (function run() {
-      
-        try {
-          // Kick off app switch
+ 
+        
+        
           window.location.href = intentUrl;
           
-          return;
-        } catch (e) {
-          // If intent navigation throws synchronously (unlikely), go web
-          //location.replace(webCheckoutUrl);
-          return;
-        }
-    })();
+     
+   
   </script>
 </body>
 </html>
