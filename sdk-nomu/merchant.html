@@ -26,13 +26,13 @@
     });
 
     document.getElementById("pay-with-paypal-sdk").addEventListener("click", () => {
-      // const result = window.open('about:blank', "_blank")
+      const result = window.open('about:blank', "_blank")
 
-      // result.location = 'bridge.html'
+      result.location.href = 'bridge.html'
 
-       var result = window.open('about:blank', "_blank");
-result.document.write('<script>window.location.replace("bridge.html");<\/script>');
-result.document.close();
+//        var result = window.open('about:blank', "_blank");
+// result.document.write('<script>window.location.replace("bridge.html");<\/script>');
+// result.document.close();
     });
   </script>
 </body>
