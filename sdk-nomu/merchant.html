@@ -1,85 +1,42 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Merchant – Pay with PayPal</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-body { font-family: system-ui, sans-serif; padding: 24px; }
-button { font-size: 16px; padding: 12px 16px; border-radius: 10px; margin: 10px 0; display: block; }
-.working { background-color: #28a745; color: white; }
-.broken { background-color: #dc3545; color: white; }
-.info { background-color: #17a2b8; color: white; }
-a { display: inline-block; padding: 12px 16px; background-color: #007bff; color: white; text-decoration: none; border-radius: 10px; margin: 10px 0; }
-p { margin: 10px 0; }
-</style>
+  <meta charset="utf-8" />
+  <title>Merchant – Pay with PayPal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 24px; }
+    button { font-size: 16px; padding: 12px 16px; border-radius: 10px; }
+  </style>
 </head>
 <body>
-<h1>Merchant Checkout</h1>
+  <h1>Merchant Checkout</h1>
 
-<button id="pay-with-paypal" class="working">Pay with PayPal (Works on Android)</button>
-<p><strong>✓ Working:</strong> Direct navigation maintains user gesture context</p>
+  <button id="pay-with-paypal">Pay with PayPal 1 tab</button>
+  <a href="bridge.html" target="_blank">Pay with PayPal 1 tab </a>
+  <p id="handle"> handle check goes here</p>
 
-<button id="pay-with-paypal-sdk" class="broken">Pay with PayPal SDK (Broken on Android)</button>
-<p><strong>✗ Broken:</strong> Two-step navigation breaks user gesture context</p>
+  <button id="pay-with-paypal-sdk">Pay with PayPal SDK</button>
+  <!-- <a href="bridge.html" target="_blank">Pay with PayPal 2 tab </a> -->
 
-<button id="pay-with-paypal-fixed" class="info">Pay with PayPal SDK (Fixed)</button>
-<p><strong>✓ Fixed:</strong> Uses programmatic write to maintain context</p>
+  <script>
+    document.getElementById("pay-with-paypal").addEventListener("click", () => {
+      const handle = window.open("bridge.html", "_blank")
+      document.getElementById("handle").textContent = handle?"got handle":"not present"
+    });
 
-<a href="bridge.html" target="_blank">Direct Bridge Link</a>
+    document.getElementById("pay-with-paypal-sdk").addEventListener("click", () => {
+      // const result = window.open('about:blank', "_blank")
 
-<p id="handle">Handle status will appear here</p>
+      // result.location = 'bridge.html'
 
-<script>
-// Working approach - direct navigation
-document.getElementById("pay-with-paypal").addEventListener("click", () => {
-    const handle = window.open("bridge.html", "_blank");
-    document.getElementById("handle").textContent = handle ? "✓ Got handle - direct navigation" : "✗ No handle";
-});
+      const result = window.open('about:blank', "_blank");
+result.document.write(`<script>window.location.replace('bridge.html');</script>`);
+result.document.close();
 
-// Broken approach - breaks user gesture context
-document.getElementById("pay-with-paypal-sdk").addEventListener("click", () => {
-    const result = window.open('about:blank', "_blank");
-    result.location = 'bridge.html';
-    document.getElementById("handle").textContent = result ? "✓ Got handle - but intent won't work on Android" : "✗ No handle";
-});
-
-// Fixed approach - maintains user gesture context
-document.getElementById("pay-with-paypal-fixed").addEventListener("click", () => {
-    const result = window.open('about:blank', "_blank");
-    result.document.write(`
-        <!doctype html>
-        <html lang="en">
-        <head>
-        <meta charset="utf-8" />
-        <title>PayPal App Switch</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta http-equiv="Cache-Control" content="no-store" />
-        <style>
-        body {
-        font-family: system-ui, sans-serif;
-        padding: 24px;
-         }
-        </style>
-        </head>
-        <body>
-        <h1>Redirecting to PayPal…</h1>
-        <p id="status">Attempting to open the PayPal app.</p>
-        <script>
-        function getIntentUrl(redirectUrl) {
-        const encodedRedirect = redirectUrl.replace(/^https?:\\/\\//, '');
-        const encodedFallback = encodeURIComponent(redirectUrl);
-        return \`intent://\${encodedRedirect}#Intent;scheme=https;package=com.paypal.android.p2pmobile;S.browser_fallback_url=\${encodedFallback};end;\`;
-         }
-        const intentUrl = getIntentUrl('https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228')
-        window.location.href = intentUrl;
-        <\\/script>
-        </body>
-        </html>
-    `);
-    result.document.close();
-    document.getElementById("handle").textContent = result ? "✓ Got handle - programmatic write maintains context" : "✗ No handle";
-});
-</script>
+    });
+  </script>
 </body>
 </html>
+
+
