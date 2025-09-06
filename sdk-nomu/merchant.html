@@ -30,10 +30,14 @@
 
       // result.location = 'bridge.html'
 
-      const result = window.open('about:blank', "_blank");
-result.document.write(`<script>window.location.replace('bridge.html');</script>`);
-result.document.close();
-
+       const result = window.open('about:blank', "_blank");
+    result.document.write(`
+        <script>
+        // Immediate redirect maintains user gesture
+        window.location.replace('bridge.html');
+        </script>
+    `);
+    result.document.close();
     });
   </script>
 </body>
