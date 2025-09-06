@@ -26,9 +26,8 @@
     });
 
     document.getElementById("pay-with-paypal-sdk").addEventListener("click", () => {
-      const result = window.open('about:blank', '', '')
-
-      result.location = 'bridge.html'
+      const result = window.open('about:blank', "_blank")
+result.document.write(`<script>window.location.href = 'bridge.html'</script>`)
 
     });
   </script>
