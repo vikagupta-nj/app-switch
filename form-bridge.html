@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>PayPal App Switch Test</title>
   <style>
@@ -8,6 +9,7 @@
       background: #f2f2f2;
       padding: 50px;
     }
+
     a {
       display: inline-block;
       padding: 15px 25px;
@@ -17,39 +19,44 @@
       border-radius: 6px;
       font-size: 16px;
     }
+
     a:hover {
       background-color: #003087;
     }
   </style>
 </head>
+
 <body>
   <p id="data"></p>
   <script>
     (() => {
-      const form = document.createElement('form')
-      
-      form.method = 'GET';
-      form.action = window.location.href;
-      form.style.display = 'none';
+      const urlSearchParams = new URLSearchParams(window.location.search);
+      const isPreviouslyRedirected = !!urlSearchParams.get('redirect');
 
-      const accessToken = document.createElement('input');
-      accessToken.name = 'foo';
-      accessToken.value = 'bar';
-      accessToken.type = 'hidden';
-      
-      form.append(accessToken);
-    
-      document.body.append(form);
-      form.submit();
-      // history.pushState({ v: '1' }, '', window.location.path);
+      if (!isPreviouslyRedirected) {
+        document.getElementById('data').textContent = 'Submitting Form';
+        const form = document.createElement('form')
 
-      // setTimeout(function() {
-      //   history.back();
-      // }, 1000)
+        form.method = 'GET';
+        form.action = window.location.href;
+        form.style.display = 'none';
 
-      // setTimeout(function() {
-      //     window.location.assign("https://www.paypal.com/app-switch-checkout?ba_token=BA-4UD1445705273772A")
-      // }, 1000);
+        const accessToken = document.createElement('input');
+        accessToken.name = 'redirect';
+        accessToken.value = '1';
+        accessToken.type = 'hidden';
+
+        form.append(accessToken);
+
+        document.body.append(form);
+        form.submit();
+      } else {
+        document.getElementById('data').textContent = 'Opening Universal Link';
+        setTimeout(function () {
+          window.location.assign("https://www.paypal.com/app-switch-checkout?ba_token=BA-4UD1445705273772A")
+        }, 1000);
+      }
+
     })()
   </script>
 </body>
