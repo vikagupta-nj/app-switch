@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PayPal App Switch Test</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f2f2f2;
+      padding: 50px;
+    }
+    a {
+      display: inline-block;
+      padding: 15px 25px;
+      background-color: #0070ba;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    a:hover {
+      background-color: #003087;
+    }
+  </style>
+</head>
+<body>
+  <p id="data"></p>
+  <script>
+    (() => {
+      const form = document.createElement('form')
+      
+      form.method = 'GET';
+      form.action = window.location.path;
+      form.style.display = 'none';
+
+      const accessToken = document.createElement('input');
+      accessToken.name = 'foo';
+      accessToken.value = 'bar';
+      accessToken.type = 'hidden';
+      
+      form.append(accessToken);
+    
+      document.body.append(form);
+      form.submit();
+      // history.pushState({ v: '1' }, '', window.location.path);
+
+      // setTimeout(function() {
+      //   history.back();
+      // }, 1000)
+
+      // setTimeout(function() {
+      //     window.location.assign("https://www.paypal.com/app-switch-checkout?ba_token=BA-4UD1445705273772A")
+      // }, 1000);
+    })()
+  </script>
+</body>
+</html>
