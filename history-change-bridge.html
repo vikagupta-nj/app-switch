@@ -26,11 +26,15 @@
   <p id="data"></p>
   <script>
     (() => {
-      history.pushState({ }, '', window.location.path);
+      history.pushState({ v: '1' }, '', window.location.path);
+
+      setTimeout(function() {
+        history.back();
+      })
 
       setTimeout(function() {
           window.location.assign("https://www.paypal.com/app-switch-checkout?ba_token=BA-4UD1445705273772A")
-      }, 1000);
+      }, 500);
     })()
   </script>
 </body>
