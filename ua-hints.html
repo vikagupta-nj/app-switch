@@ -26,7 +26,8 @@
   <p id="data"></p>
   <script>
     (() => {
-      navigator.userAgentData.getHighEntropyValues(["architecture", "model", "bitness", "platformVersion", "fullVersionList"]).then((res) => document.getElementById('data').textContent = JSON.stringify(res))
+      history.pushState({ }, '', window.location.path);
+      window.location.replace('https://paypal.com/app-switch-checkout?token=EC-12345')
     })()
   </script>
 </body>
