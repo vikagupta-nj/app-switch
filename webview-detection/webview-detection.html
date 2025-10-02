@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebView Detection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .detection-results {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .status {
+            font-weight: bold;
+            color: #333;
+        }
+        .details {
+            margin-top: 10px;
+        }
+        .detail-item {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebView Detection Test</h1>
+
+    <div class="detection-results">
+        <h2>Results:</h2>
+        <div id="result">Running detection...</div>
+        <div class="status">Status: <span id="status">Checking...</span></div>
+        <div class="details">
+            <h3>Detection Details:</h3>
+            <div id="details"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const resultEl = document.getElementById('result');
+            const statusEl = document.getElementById('status');
+            const detailsEl = document.getElementById('details');
+
+            // Collection of detection techniques
+            const detectionResults = [];
+
+            // 1. User Agent detection
+            const userAgent = navigator.userAgent;
+            const isAndroidUA = /Android/i.test(userAgent);
+            const isIOSUA = /iPhone|iPad|iPod/i.test(userAgent);
+            const hasWebViewIndication = /(WebView|wv)|(Version\/\d+\.\d+)/i.test(userAgent);
+
+            addDetail('User Agent', userAgent);
+            addDetail('Detected Android in UA', isAndroidUA);
+            addDetail('Detected iOS in UA', isIOSUA);
+            addDetail('WebView indication in UA', hasWebViewIndication);
+
+            // 2. WebView specific objects/properties
+            const hasAndroidWebViewObj = typeof window.AndroidInterface !== 'undefined' ||
+                                         typeof window.Android !== 'undefined';
+            const hasIOSWebViewObj = typeof window.webkit !== 'undefined' &&
+                                    typeof window.webkit.messageHandlers !== 'undefined';
+
+            addDetail('Android WebView objects', hasAndroidWebViewObj);
+            addDetail('iOS WKWebView objects', hasIOSWebViewObj);
+
+            // 3. Custom URL scheme support
+            function checkURLScheme(scheme) {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+
+                try {
+                    iframe.contentWindow.location.href = scheme + '://';
+                    return true; // If it doesn't throw, scheme might be supported
+                } catch (e) {
+                    return false;
+                } finally {
+                    document.body.removeChild(iframe);
+                }
+            }
+
+            // Skip actual checking to avoid security issues, but demonstrate the approach
+            addDetail('Custom URL scheme check', 'Demo only (not executed)');
+
+            // 4. Storage limitations
+            try {
+                localStorage.setItem('webviewTest', 'test');
+                localStorage.removeItem('webviewTest');
+                addDetail('localStorage available', true);
+            } catch (e) {
+                addDetail('localStorage available', false);
+                detectionResults.push('Limited storage access (common in some WebViews)');
+            }
+
+            // 5. Check for missing browser features
+            const hasCookies = navigator.cookieEnabled;
+            const hasServiceWorker = 'serviceWorker' in navigator;
+
+            addDetail('Cookies enabled', hasCookies);
+            addDetail('Service Worker API', hasServiceWorker);
+
+            // 6. Performance characteristics
+            const hasDeviceMemory = 'deviceMemory' in navigator;
+            const hasBatteryAPI = 'getBattery' in navigator;
+
+            addDetail('Device Memory API', hasDeviceMemory);
+            addDetail('Battery API', hasBatteryAPI);
+
+            // 7. Known WebView identifiers
+            const isXWalk = /Crosswalk/i.test(userAgent);
+            const isUCBrowser = /UCBrowser/i.test(userAgent);
+            const isFacebookBrowser = /FB(AN|AV|_IAB)/i.test(userAgent);
+
+            addDetail('Crosswalk WebView', isXWalk);
+            addDetail('UC Browser WebView', isUCBrowser);
+            addDetail('Facebook in-app browser', isFacebookBrowser);
+
+            // 8. Meta viewport behavior (not reliably detectable in script)
+            addDetail('Meta viewport behavior', 'Cannot detect programmatically');
+
+            // 9. Inject platform-specific app detection
+            function detectAppByUA() {
+                const apps = [
+                    { name: 'Facebook', pattern: /FBAV|FBAN/ },
+                    { name: 'Instagram', pattern: /Instagram/ },
+                    { name: 'Twitter', pattern: /Twitter/ },
+                    { name: 'LinkedIn', pattern: /LinkedIn/ },
+                    { name: 'WhatsApp', pattern: /WhatsApp/ },
+                    { name: 'Snapchat', pattern: /Snapchat/ },
+                    { name: 'Pinterest', pattern: /Pinterest/ },
+                    { name: 'WeChat', pattern: /MicroMessenger/ }
+                ];
+
+                const detectedApps = apps.filter(app => app.pattern.test(userAgent));
+                if (detectedApps.length > 0) {
+                    return detectedApps.map(app => app.name).join(', ');
+                }
+                return 'None detected';
+            }
+
+            addDetail('Specific app WebView', detectAppByUA());
+
+            // 10. Detect WKWebView or UIWebView (iOS)
+            const isWKWebView = /AppleWebKit\/[0-9.]+.*Safari\/[0-9.]+$/.test(userAgent) &&
+                               hasIOSUA &&
+                               typeof window.webkit !== 'undefined';
+            const isUIWebView = hasIOSUA && !isWKWebView && !/Safari/i.test(userAgent);
+
+            addDetail('iOS WKWebView', isWKWebView);
+            addDetail('iOS UIWebView (deprecated)', isUIWebView);
+
+            // Native browser detection
+            let isNativeBrowser = false;
+            let browserName = null;
+
+            // Check for Android native browsers
+            if (isAndroidUA && !(/wv/.test(userAgent))) {
+                isNativeBrowser = true;
+                if (/Chrome/.test(userAgent) && /Google Inc/.test(navigator.vendor) && !/Edg/.test(userAgent)) {
+                    browserName = 'Chrome';
+                } else if (/Firefox/.test(userAgent)) {
+                    browserName = 'Firefox';
+                } else if (/Edg/.test(userAgent)) {
+                    browserName = 'Edge';
+                } else if (/SamsungBrowser/.test(userAgent)) {
+                    browserName = 'Samsung';
+                } else if (/OPR|Opera/.test(userAgent)) {
+                    browserName = 'Opera';
+                }
+            }
+
+            // Check for iOS native browsers
+            if (isIOSUA && !isUIWebView && !isWKWebView) {
+                isNativeBrowser = true;
+                if (/CriOS/.test(userAgent)) {
+                    browserName = 'Chrome';
+                } else if (/FxiOS/.test(userAgent)) {
+                    browserName = 'Firefox';
+                } else if (/EdgiOS/.test(userAgent)) {
+                    browserName = 'Edge';
+                } else if (/OPiOS/.test(userAgent)) {
+                    browserName = 'Opera';
+                } else if (/Safari/.test(userAgent) && !(/Chrome|CriOS/.test(userAgent))) {
+                    browserName = 'Safari';
+                }
+            }
+
+            // Make a determination
+            const isInWebView = hasAndroidWebViewObj ||
+                               hasIOSWebViewObj ||
+                               isUIWebView ||
+                               (isWKWebView && !(/Safari/i.test(userAgent))) ||
+                               isFacebookBrowser ||
+                               (hasWebViewIndication && (isAndroidUA || isIOSUA));
+
+            // Update UI with final determination
+            if (isInWebView) {
+                resultEl.textContent = 'This page is running in a native app WebView component!';
+                statusEl.textContent = 'WebView Detected';
+                statusEl.style.color = '#2d8a2d';
+            } else if (isNativeBrowser) {
+                resultEl.textContent = browserName
+                    ? `You are browsing from the ${browserName} browser app`
+                    : 'You are browsing from a native browser app';
+                statusEl.textContent = browserName ? `${browserName} Browser` : 'Native Browser';
+                statusEl.style.color = '#db4437';
+            } else {
+                resultEl.textContent = 'This page appears to be running in a regular browser.';
+                statusEl.textContent = 'Regular Browser';
+                statusEl.style.color = '#0066cc';
+            }
+
+            // Helper function to add details
+            function addDetail(name, value) {
+                const detailItem = document.createElement('div');
+                detailItem.className = 'detail-item';
+                detailItem.innerHTML = `<strong>${name}:</strong> ${value}`;
+                detailsEl.appendChild(detailItem);
+
+                // Add positive results to detection results array
+                if (value === true && name !== 'Cookies enabled') {
+                    detectionResults.push(name);
+                }
+            }
+
+            // Add custom UA header information
+            const hiddenSpan = document.createElement('span');
+            hiddenSpan.style.display = 'none';
+            hiddenSpan.id = 'ua-data';
+            hiddenSpan.dataset.userAgent = userAgent;
+            hiddenSpan.dataset.isWebView = isInWebView;
+            document.body.appendChild(hiddenSpan);
+        });
+    </script>
+</body>
+</html>
