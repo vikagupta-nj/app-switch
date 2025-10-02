@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebView Detection Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f7;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #007aff;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin-top: 20px;
+        }
+        .content {
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .demo-card {
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+            background-color: #f9f9f9;
+        }
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+        }
+        h2 {
+            color: #007aff;
+            margin-top: 0;
+        }
+        .demo-link {
+            display: inline-block;
+            background-color: #007aff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        .demo-link:hover {
+            background-color: #0056b3;
+        }
+        .comparison {
+            display: flex;
+            margin: 30px 0;
+            gap: 20px;
+        }
+        .comparison-col {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .client-side {
+            background-color: #e8f4fd;
+            border: 1px solid #b6d9f2;
+        }
+        .server-side {
+            background-color: #e9f7ef;
+            border: 1px solid #c3e6cb;
+        }
+        .pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            background-color: #e1f5fe;
+            color: #0288d1;
+        }
+        .detection-info {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .current-env {
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .detection-result {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+        @media (max-width: 600px) {
+            .comparison {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WebView Detection Demo</h1>
+            <p>Test and compare different methods for detecting if a web page is running inside a native app WebView</p>
+        </header>
+
+        <div class="content">
+            <div class="current-env">
+                <h3>Your Current Environment</h3>
+                <p>Let's quickly analyze your current browsing environment:</p>
+                <div id="quick-detection" class="detection-result">Analyzing...</div>
+            </div>
+
+            <h2>Available Demos</h2>
+            <p>This demo suite shows different approaches to detecting WebView environments:</p>
+
+            <div class="comparison">
+                <div class="comparison-col client-side">
+                    <h3>Client-Side Detection</h3>
+                    <div class="pill">JavaScript</div>
+                    <div class="pill">Browser-Based</div>
+                    <p>Detects WebViews using JavaScript directly in the browser by analyzing:</p>
+                    <ul>
+                        <li>User agent strings</li>
+                        <li>Bridge objects</li>
+                        <li>Missing browser features</li>
+                        <li>App-specific patterns</li>
+                    </ul>
+                    <div class="detection-info">No server component required. Works entirely in the browser.</div>
+                </div>
+
+                <div class="comparison-col server-side">
+                    <h3>Server-Side Detection</h3>
+                    <div class="pill">Node.js</div>
+                    <div class="pill">HTTP-Based</div>
+                    <p>Detects WebViews on the server by analyzing:</p>
+                    <ul>
+                        <li>HTTP headers</li>
+                        <li>User agent patterns</li>
+                        <li>Request characteristics</li>
+                        <li>Missing browser headers</li>
+                    </ul>
+                    <div class="detection-info">Server component required. Can adapt content before sending to client.</div>
+                </div>
+            </div>
+
+            <div class="demo-card">
+                <h2>Basic WebView Detection</h2>
+                <p>A simple example showing basic WebView detection techniques with a clean, minimal interface.</p>
+                <p>Perfect for understanding the core concepts of WebView detection.</p>
+                <a href="/webview-detection.html" class="demo-link">Try Basic Detection</a>
+            </div>
+
+            <div class="demo-card">
+                <h2>Advanced Client-Side Detection</h2>
+                <p>Comprehensive client-side detection using multiple techniques and providing detailed analysis.</p>
+                <p>Features confidence scoring, detection method breakdown, and technical details.</p>
+                <a href="/advanced-detection.html" class="demo-link">Try Advanced Detection</a>
+            </div>
+
+            <div class="demo-card">
+                <h2>Server-Side Detection</h2>
+                <p>Demonstrates how to detect WebViews on the server side before delivering content.</p>
+                <p>Shows how to use HTTP headers and request properties to identify WebView environments.</p>
+                <a href="/server-detection" class="demo-link">Try Server Detection</a>
+            </div>
+
+            <div class="demo-card">
+                <h2>API Reference</h2>
+                <p>Check the raw detection data from both client and server through our API endpoints.</p>
+                <ul>
+                    <li><a href="/api/detect">GET /api/detect</a> - Server detection data</li>
+                    <li>POST /api/report - Report client detection data (use from code)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="app-detection.js"></script>
+    <script>
+        // Quick detection for the homepage
+        document.addEventListener('DOMContentLoaded', function() {
+            const quickDetectionEl = document.getElementById('quick-detection');
+
+            // Run detection
+            const result = AppDetection.detect();
+
+            if (result.isInWebView) {
+                quickDetectionEl.textContent = 'You are browsing from a native app WebView component!';
+                quickDetectionEl.style.color = '#27ae60';
+
+                if (result.detectedApp) {
+                    quickDetectionEl.textContent += ` (${result.detectedApp})`;
+                }
+
+                if (result.isInAndroidWebView) {
+                    quickDetectionEl.textContent += ' on Android';
+                } else if (result.isInIOSWebView) {
+                    quickDetectionEl.textContent += ' on iOS';
+                }
+            } else if (result.isInNativeBrowser) {
+                const browserName = result.detectedApp ? result.detectedApp.replace(' Browser', '') : null;
+                quickDetectionEl.textContent = browserName
+                    ? `You are browsing from the ${browserName} browser app`
+                    : 'You are browsing from a native browser app';
+                quickDetectionEl.style.color = '#db4437'; // Browser red
+            } else {
+                quickDetectionEl.textContent = 'You are browsing from a standard web browser';
+                quickDetectionEl.style.color = '#0066cc';
+            }
+
+            // Report to server for analytics
+            AppDetection.reportToServer('/api/report').catch(err => {
+                console.log('Could not report to server:', err);
+            });
+        });
+    </script>
+</body>
+</html>
