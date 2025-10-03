@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Merchant – Pay with PayPal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 24px;
+      margin: 0;
+      background: #f7f7f7;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 400px;
+      margin: 32px auto 0 auto;
+      padding: 0 16px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 16px 0;
+      border-radius: 12px;
+      border: none;
+      background: #0070ba;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    button:active {
+      background: #005c99;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 24px;
+      color: #222;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Merchant Checkout</h1>
+
+  <div class="button-group">
+    <button id="direct-current">Direct API - current</button>
+    <button id="direct-proposed">Direct API - Proposed</button>
+    <button id="sdk-current">JS SDK - current</button>
+    <button id="sdk-proposed">JS SDK - proposed</button>
+  </div>
+
+
+  <script>
+    document.getElementById("direct-current").addEventListener("click", () => {
+      window.location.assign("bridge-current.html");
+    });
+
+    document.getElementById("direct-proposed").addEventListener("click", () => {
+      window.location.assign("bridge-proposed.html");
+    });
+
+    document.getElementById("sdk-current").addEventListener("click", () => {
+      const win = window.open('about:blank', '_blank');
+      win.location = 'bridge-current.html';
+    });
+
+    document.getElementById("sdk-proposed").addEventListener("click", () => {
+      const win = window.open('about:blank', '_blank');
+      win.location = 'bridge-proposed.html';
+    });
+  </script>
+</body>
+
+</html>

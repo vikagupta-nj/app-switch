@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>PayPal App Switch</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            padding: 24px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Redirecting to PayPal…</h1>
+    <p id="status">Click the button below to continue to PayPal. If you don't click within 3 seconds, PayPal.com will
+        open automatically.</p>
+    <button id="continueBtn"
+        style="font-size:18px;padding:12px 24px;border-radius:8px;background:#0070ba;color:#fff;border:none;">Continue
+        to PayPal</button>
+    <script>
+        function getIntentUrl(redirectUrl) {
+            const encodedRedirect = redirectUrl.replace(/^https?:\/\//, '');
+            const encodedFallback = encodeURIComponent(redirectUrl);
+            return `intent://${encodedRedirect}#Intent;scheme=https;package=com.paypal.android.p2pmobile;S.browser_fallback_url=${encodedFallback};end;`;
+        }
+        const intentUrl = "https://www.paypal.com/app-switch-checkout?ba_token=XYZ";
+        const fallbackUrl = "https://www.paypal.com";
+        let clicked = false;
+
+        document.getElementById("continueBtn").addEventListener("click", function () {
+            clicked = true;
+            window.location.assign(intentUrl);
+        });
+
+        setTimeout(function () {
+            if (!clicked) {
+                window.location.assign(fallbackUrl);
+            }
+        }, 3000);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>PayPal App Switch</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            padding: 24px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Redirecting to PayPal…</h1>
+    <p id="status">Attempting to open the PayPal app.</p>
+    <script>
+        function getIntentUrl(redirectUrl) {
+            const encodedRedirect = redirectUrl.replace(/^https?:\/\//, '');
+            const encodedFallback = encodeURIComponent(redirectUrl);
+            return `intent://${encodedRedirect}#Intent;scheme=https;package=com.paypal.android.p2pmobile;S.browser_fallback_url=${encodedFallback};end;`;
+        }
+        const intentUrl = getIntentUrl('https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228')
+        //const intentUrl = "https://www.paypal.com/app-switch-checkout?ba_token=XYZ"
+        window.location.assign(intentUrl); // didn't work
+
+    </script>
+</body>
+
+</html>
