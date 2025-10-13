@@ -37,14 +37,14 @@
 
         document.getElementById("continueBtn").addEventListener("click", function () {
             clicked = true;
-            window.location.assign(intentUrl);
+            window.location.assign(getIntentUrl(intentUrl));
         });
 
         setTimeout(function () {
             if (!clicked) {
                 window.location.assign(fallbackUrl);
             }
-        }, 3000);
+        }, 5000);
     </script>
 </body>
 
