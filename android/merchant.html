@@ -49,12 +49,38 @@
 <body>
   <h1>Merchant Checkout</h1>
 
+  <form style="margin:32px auto 0 auto;max-width:400px;">
+    <label for="username" style="font-size:16px;display:block;margin-bottom:8px;">User Name:</label>
+    <input type="text" id="username" name="username" placeholder="Enter your name" style="width:100%;padding:12px;font-size:16px;border-radius:8px;border:1px solid #ccc;">
+  </form>
+
   <div class="button-group">
     <button id="direct-current">Direct API - current</button>
     <button id="direct-proposed">Direct API - Proposed</button>
     <button id="sdk-current">JS SDK - current</button>
     <button id="sdk-proposed">JS SDK - proposed</button>
   </div>
+
+  <div id="load-status" style="margin:32px auto 0 auto;max-width:400px;text-align:center;font-size:16px;color:#444;"></div>
+  <script>
+    function updateLoadStatus(type) {
+      const el = document.getElementById('load-status');
+      if (type === 'bfcache') {
+        el.textContent = 'Page restored from Chrome bfcache (back-forward cache).';
+        el.style.color = '#0070ba';
+      } else {
+        el.textContent = 'Full page load.';
+        el.style.color = '#222';
+      }
+    }
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+        updateLoadStatus('bfcache');
+      } else {
+        updateLoadStatus('full');
+      }
+    });
+  </script>
 
 
   <script>
@@ -75,6 +101,7 @@
       const win = window.open('about:blank', '_blank');
       win.location = 'bridge-proposed.html';
     });
+
   </script>
 </body>
 
