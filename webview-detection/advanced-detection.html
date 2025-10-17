@@ -20,10 +20,18 @@
         header {
             background-color: #007aff;
             color: white;
-            padding: 20px;
+            padding: 20px 15px;
             text-align: center;
             border-radius: 10px 10px 0 0;
             margin-top: 20px;
+        }
+        header h1 {
+            font-size: 1.6rem;
+            margin: 0 0 10px 0;
+        }
+        header p {
+            font-size: 0.9rem;
+            margin: 0;
         }
         .detection-panel {
             background-color: white;
@@ -107,14 +115,20 @@
             background-color: #007aff;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 12px 24px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 1rem;
-            margin: 5px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 8px;
+            min-width: 200px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
         }
         button:hover {
             background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         pre {
             background-color: #f0f0f0;
@@ -221,10 +235,22 @@
             const result = AppDetection.detect();
 
             // Update UI with results
-            if (result.isInWebView) {
+            if (result.isInWebView && !result.isSafariViewController) {
                 resultSummary.textContent = 'You are browsing from within a native app WebView component!';
                 resultSummary.className = 'result-summary webview-true';
                 environment.textContent = 'Native App WebView';
+            } else if (result.isAndroidCustomTab) {
+                resultSummary.textContent = 'You are browsing from Chrome Custom Tabs!';
+                resultSummary.className = 'result-summary webview-false';
+                resultSummary.style.color = '#ff9800'; // Custom Tabs orange
+                resultSummary.style.borderColor = '#ff9800';
+                environment.textContent = 'Chrome Custom Tabs';
+            } else if (result.isSafariViewController) {
+                resultSummary.textContent = 'You are browsing from SFSafariViewController!';
+                resultSummary.className = 'result-summary webview-false';
+                resultSummary.style.color = '#34A853'; // Safari green
+                resultSummary.style.borderColor = '#34A853';
+                environment.textContent = 'SFSafariViewController';
             } else if (result.isInNativeBrowser) {
                 const browserName = result.detectedApp ? result.detectedApp.replace(' Browser', '') : null;
                 resultSummary.textContent = browserName
@@ -245,8 +271,12 @@
 
             if (result.isInAndroidWebView) {
                 platform.textContent = 'Android WebView';
-            } else if (result.isInIOSWebView) {
+            } else if (result.isInIOSWebView && !result.isSafariViewController) {
                 platform.textContent = 'iOS WebView';
+            } else if (result.isAndroidCustomTab) {
+                platform.textContent = 'Android Chrome Custom Tabs';
+            } else if (result.isSafariViewController) {
+                platform.textContent = 'iOS SFSafariViewController';
             } else {
                 platform.textContent = 'Regular Browser';
             }
@@ -294,8 +324,12 @@
 
                 const headers = {
                     'X-App-WebView': result.isInWebView,
+                    'X-Android-CustomTab': result.isAndroidCustomTab,
+                    'X-Safari-ViewController': result.isSafariViewController,
                     'X-App-Platform': result.isInAndroidWebView ? 'Android' :
-                                    (result.isInIOSWebView ? 'iOS' : 'Browser')
+                                    (result.isInIOSWebView ? 'iOS' :
+                                    (result.isAndroidCustomTab ? 'Android' :
+                                    (result.isSafariViewController ? 'iOS' : 'Browser')))
                 };
 
                 if (result.detectedApp) {
