@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opening PayPal...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        #detection-results {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h3>PayPal Bridge Status</h3>
+        <p id="status">Loading...</p>
+        <p>Activation status: <span id="tua-status">n/a</span></p>
+    </div>
+
+    <div class="section">
+        <h3>WebView Detection Results</h3>
+        <div id="detection-results">Running detection...</div>
+    </div>
+
+    <script src="app-detection.js"></script>
+
+    <script>
+        window.addEventListener('load', () => {
+            document.querySelector('#status').textContent = 'Opening PayPal app...'
+            document.querySelector('#tua-status').textContent = `hasBeenActive: ${navigator.userActivation.hasBeenActive}, isActive: ${navigator.userActivation.isActive}`
+            
+            // Run app detection and display results
+            try {
+                const detection = AppDetection.detect();
+
+                // Create a string with detectionResult at the top, followed by the full JSON
+                const resultText = `Detection Result: ${detection.detectionResult || 'unknown'}\n\n${JSON.stringify(detection, null, 2)}`;
+
+                // Display the result in the pre element
+                document.querySelector('#detection-results').textContent = resultText;
+            } catch (error) {
+                document.querySelector('#detection-results').textContent = 'Error running detection: ' + error.message;
+            }
+            
+            // Try to trigger the universal link            
+            setTimeout(function() {
+                window.location.assign("https://www.paypal.com/app-switch-checkout?ba_token=BA-4UD1445705273772A")
+            }, 1000);
+        })
+    </script>
+</body>
+</html>

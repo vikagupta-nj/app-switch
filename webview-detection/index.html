@@ -21,10 +21,18 @@
         header {
             background-color: #007aff;
             color: white;
-            padding: 30px 20px;
+            padding: 20px 15px;
             text-align: center;
             border-radius: 10px 10px 0 0;
             margin-top: 20px;
+        }
+        header h1 {
+            font-size: 1.6rem;
+            margin: 0 0 10px 0;
+        }
+        header p {
+            font-size: 0.9rem;
+            margin: 0;
         }
         .content {
             background-color: white;
@@ -56,14 +64,21 @@
             display: inline-block;
             background-color: #007aff;
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 6px;
             margin-top: 10px;
+            font-size: 1.1rem;
             font-weight: 500;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
         }
         .demo-link:hover {
             background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         .comparison {
             display: flex;
@@ -97,17 +112,112 @@
             font-size: 0.9rem;
             color: #555;
         }
-        .current-env {
-            background-color: #e8f5e9;
-            border: 1px solid #c8e6c9;
+        .detection-panel {
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .result-summary {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin: 20px 0;
             padding: 15px;
             border-radius: 8px;
-            margin: 20px 0;
+            text-align: center;
         }
-        .detection-result {
-            font-weight: bold;
+        .webview-true {
+            background-color: #e9f7ef;
+            color: #27ae60;
+            border: 1px solid #27ae60;
+        }
+        .webview-false {
+            background-color: #f0f0f0;
+            color: #2c3e50;
+            border: 1px solid #bdc3c7;
+        }
+        .details-section {
+            margin-top: 20px;
+        }
+        .details-section h3 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .detail-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .detail-item {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .detail-label {
+            font-weight: 500;
+            flex: 1;
+        }
+        .detail-value {
+            flex: 2;
+            text-align: right;
+        }
+        .method-tag {
+            display: inline-block;
+            background-color: #e1f5fe;
+            color: #0288d1;
+            border-radius: 4px;
+            padding: 3px 8px;
+            margin: 3px;
+            font-size: 0.8rem;
+        }
+        .confidence-meter {
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .confidence-level {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+        .actions {
+            margin-top: 20px;
+            text-align: center;
+        }
+        button {
+            background-color: #007aff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
             font-size: 1.1rem;
-            margin-top: 10px;
+            font-weight: 500;
+            margin: 8px;
+            min-width: 200px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        .hidden {
+            display: none;
         }
         @media (max-width: 600px) {
             .comparison {
@@ -124,14 +234,89 @@
         </header>
 
         <div class="content">
-            <div class="current-env">
-                <h3>Your Current Environment</h3>
-                <p>Let's quickly analyze your current browsing environment:</p>
-                <div id="quick-detection" class="detection-result">Analyzing...</div>
+            <div class="detection-panel">
+                <div id="result-summary" class="result-summary">Detecting environment...</div>
+
+                <div class="confidence-meter">
+                    <div id="confidence-level" class="confidence-level" style="width: 0%"></div>
+                </div>
+
+                <div class="details-section">
+                    <h3>Detection Details</h3>
+
+                    <div class="detail-card">
+                        <div class="detail-item">
+                            <span class="detail-label">Environment:</span>
+                            <span id="environment" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">App Detected:</span>
+                            <span id="app-name" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Platform:</span>
+                            <span id="platform" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item" id="iframe-indicator" style="display: none;">
+                            <span class="detail-label">Loaded in iframe:</span>
+                            <span class="detail-value">true</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Confidence:</span>
+                            <span id="confidence" class="detail-value">-</span>
+                        </div>
+                    </div>
+
+                    <h3>Detection Methods</h3>
+                    <div id="detection-methods" class="detail-card">
+                        <p>No detection methods used yet</p>
+                    </div>
+
+                    <div class="actions">
+                        <button id="toggle-details">Show Technical Details</button>
+                        <button id="test-server-detection">Test Server Detection</button>
+                    </div>
+
+                    <div id="technical-details" class="hidden">
+                        <h3>Technical Details</h3>
+                        <pre id="json-output"></pre>
+                    </div>
+
+                    <div id="server-test-results" class="hidden">
+                        <h3>Server Detection Test</h3>
+                        <div class="detail-card">
+                            <p>This simulates sending a request to a server with the appropriate headers.</p>
+                            <div id="server-headers"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <h2>Available Demos</h2>
             <p>This demo suite shows different approaches to detecting WebView environments:</p>
+
+            <div class="demo-card">
+                <h2>Advanced Client-Side Detection</h2>
+                <p>Comprehensive client-side detection using multiple techniques and providing detailed analysis.</p>
+                <p>Features confidence scoring, detection method breakdown, and technical details.</p>
+                <a href="/advanced-detection.html" class="demo-link">Try Advanced Detection</a>
+            </div>
+
+            <div class="demo-card">
+                <h2>Server-Side Detection</h2>
+                <p>Demonstrates how to detect WebViews on the server side before delivering content.</p>
+                <p>Shows how to use HTTP headers and request properties to identify WebView environments.</p>
+                <a href="/server-detection" class="demo-link">Try Server Detection</a>
+            </div>
+
+            <div class="demo-card">
+                <h2>API Reference</h2>
+                <p>Check the raw detection data from both client and server through our API endpoints.</p>
+                <ul>
+                    <li><a href="/api/detect">GET /api/detect</a> - Server detection data</li>
+                    <li>POST /api/report - Report client detection data (use from code)</li>
+                </ul>
+            </div>
 
             <div class="comparison">
                 <div class="comparison-col client-side">
@@ -162,71 +347,152 @@
                     <div class="detection-info">Server component required. Can adapt content before sending to client.</div>
                 </div>
             </div>
-
-            <div class="demo-card">
-                <h2>Basic WebView Detection</h2>
-                <p>A simple example showing basic WebView detection techniques with a clean, minimal interface.</p>
-                <p>Perfect for understanding the core concepts of WebView detection.</p>
-                <a href="/webview-detection.html" class="demo-link">Try Basic Detection</a>
-            </div>
-
-            <div class="demo-card">
-                <h2>Advanced Client-Side Detection</h2>
-                <p>Comprehensive client-side detection using multiple techniques and providing detailed analysis.</p>
-                <p>Features confidence scoring, detection method breakdown, and technical details.</p>
-                <a href="/advanced-detection.html" class="demo-link">Try Advanced Detection</a>
-            </div>
-
-            <div class="demo-card">
-                <h2>Server-Side Detection</h2>
-                <p>Demonstrates how to detect WebViews on the server side before delivering content.</p>
-                <p>Shows how to use HTTP headers and request properties to identify WebView environments.</p>
-                <a href="/server-detection" class="demo-link">Try Server Detection</a>
-            </div>
-
-            <div class="demo-card">
-                <h2>API Reference</h2>
-                <p>Check the raw detection data from both client and server through our API endpoints.</p>
-                <ul>
-                    <li><a href="/api/detect">GET /api/detect</a> - Server detection data</li>
-                    <li>POST /api/report - Report client detection data (use from code)</li>
-                </ul>
-            </div>
         </div>
     </div>
 
     <script src="app-detection.js"></script>
     <script>
-        // Quick detection for the homepage
         document.addEventListener('DOMContentLoaded', function() {
-            const quickDetectionEl = document.getElementById('quick-detection');
+            // Elements
+            const resultSummary = document.getElementById('result-summary');
+            const environment = document.getElementById('environment');
+            const appName = document.getElementById('app-name');
+            const platform = document.getElementById('platform');
+            const confidenceEl = document.getElementById('confidence');
+            const confidenceLevel = document.getElementById('confidence-level');
+            const detectionMethods = document.getElementById('detection-methods');
+            const jsonOutput = document.getElementById('json-output');
+            const toggleDetails = document.getElementById('toggle-details');
+            const technicalDetails = document.getElementById('technical-details');
+            const testServerBtn = document.getElementById('test-server-detection');
+            const serverTestResults = document.getElementById('server-test-results');
+            const serverHeaders = document.getElementById('server-headers');
+            const iframeIndicator = document.getElementById('iframe-indicator');
 
-            // Run detection
+            // Run the detection
             const result = AppDetection.detect();
 
-            if (result.isInWebView) {
-                quickDetectionEl.textContent = 'You are browsing from a native app WebView component!';
-                quickDetectionEl.style.color = '#27ae60';
-
-                if (result.detectedApp) {
-                    quickDetectionEl.textContent += ` (${result.detectedApp})`;
-                }
-
-                if (result.isInAndroidWebView) {
-                    quickDetectionEl.textContent += ' on Android';
-                } else if (result.isInIOSWebView) {
-                    quickDetectionEl.textContent += ' on iOS';
-                }
+            // Update UI with results
+            if (result.isInWebView && !result.isSafariViewController) {
+                resultSummary.textContent = 'You are browsing from within a native app WebView component!';
+                resultSummary.className = 'result-summary webview-true';
+                environment.textContent = 'Native App WebView';
+            } else if (result.isAndroidCustomTab) {
+                resultSummary.textContent = 'You are browsing from Chrome Custom Tabs!';
+                resultSummary.className = 'result-summary webview-false';
+                resultSummary.style.color = '#ff9800'; // Custom Tabs orange
+                resultSummary.style.borderColor = '#ff9800';
+                environment.textContent = 'Chrome Custom Tabs';
+            } else if (result.isSafariViewController) {
+                resultSummary.textContent = 'You are browsing from SFSafariViewController!';
+                resultSummary.className = 'result-summary webview-false';
+                resultSummary.style.color = '#34A853'; // Safari green
+                resultSummary.style.borderColor = '#34A853';
+                environment.textContent = 'SFSafariViewController';
             } else if (result.isInNativeBrowser) {
                 const browserName = result.detectedApp ? result.detectedApp.replace(' Browser', '') : null;
-                quickDetectionEl.textContent = browserName
+                resultSummary.textContent = browserName
                     ? `You are browsing from the ${browserName} browser app`
                     : 'You are browsing from a native browser app';
-                quickDetectionEl.style.color = '#db4437'; // Browser red
+                resultSummary.className = 'result-summary webview-false';
+                resultSummary.style.color = '#db4437'; // Browser red
+                resultSummary.style.borderColor = '#db4437';
+                environment.textContent = result.detectedApp || 'Native Browser';
             } else {
-                quickDetectionEl.textContent = 'You are browsing from a standard web browser';
-                quickDetectionEl.style.color = '#0066cc';
+                resultSummary.textContent = 'You are browsing from a standard web browser';
+                resultSummary.className = 'result-summary webview-false';
+                environment.textContent = 'Standard Web Browser';
             }
+
+            // Update details
+            appName.textContent = result.detectedApp || 'Not detected';
+
+            if (result.isInAndroidWebView) {
+                platform.textContent = 'Android WebView';
+            } else if (result.isInIOSWebView && !result.isSafariViewController) {
+                platform.textContent = 'iOS WebView';
+            } else if (result.isAndroidCustomTab) {
+                platform.textContent = 'Android Chrome Custom Tabs';
+            } else if (result.isSafariViewController) {
+                platform.textContent = 'iOS SFSafariViewController';
+            } else {
+                platform.textContent = 'Regular Browser';
+            }
+
+            // Show iframe indicator if detected
+            if (result.isInIframe) {
+                iframeIndicator.style.display = 'flex';
+            }
+
+            confidenceEl.textContent = `${result.confidence}%`;
+            confidenceLevel.style.width = `${result.confidence}%`;
+
+            // Set confidence level color based on value
+            if (result.confidence > 80) {
+                confidenceLevel.style.backgroundColor = '#27ae60'; // Green
+            } else if (result.confidence > 50) {
+                confidenceLevel.style.backgroundColor = '#f39c12'; // Orange
+            } else {
+                confidenceLevel.style.backgroundColor = '#e74c3c'; // Red
+            }
+
+            // Show detection methods
+            if (result.detectionMethods.length > 0) {
+                detectionMethods.innerHTML = '';
+                result.detectionMethods.forEach(method => {
+                    const methodElement = document.createElement('span');
+                    methodElement.className = 'method-tag';
+                    methodElement.textContent = method.replace(/_/g, ' ');
+                    detectionMethods.appendChild(methodElement);
+                });
+            }
+
+            // Set JSON output
+            jsonOutput.textContent = JSON.stringify(result, null, 2);
+
+            // Toggle technical details
+            toggleDetails.addEventListener('click', function() {
+                technicalDetails.classList.toggle('hidden');
+                toggleDetails.textContent = technicalDetails.classList.contains('hidden') ?
+                    'Show Technical Details' : 'Hide Technical Details';
+            });
+
+            // Test server detection
+            testServerBtn.addEventListener('click', function() {
+                // Enable server detection
+                AppDetection.setupServerDetection();
+
+                // Show headers that would be sent
+                serverTestResults.classList.remove('hidden');
+
+                const headers = {
+                    'X-App-WebView': result.isInWebView,
+                    'X-Android-CustomTab': result.isAndroidCustomTab,
+                    'X-Safari-ViewController': result.isSafariViewController,
+                    'X-App-Platform': result.isInAndroidWebView ? 'Android' :
+                                    (result.isInIOSWebView ? 'iOS' :
+                                    (result.isAndroidCustomTab ? 'Android' :
+                                    (result.isSafariViewController ? 'iOS' : 'Browser')))
+                };
+
+                if (result.detectedApp) {
+                    headers['X-App-Name'] = result.detectedApp;
+                }
+
+                let headerHtml = '<h4>HTTP Headers that would be sent to server:</h4>';
+
+                for (const [key, value] of Object.entries(headers)) {
+                    headerHtml += `<div class="detail-item">
+                        <span class="detail-label">${key}:</span>
+                        <span class="detail-value">${value}</span>
+                    </div>`;
+                }
+
+                headerHtml += `<p>These headers would be automatically added to all AJAX requests
+                from this page, allowing the server to identify the environment.</p>`;
+
+                serverHeaders.innerHTML = headerHtml;
+            });
 
             // Report to server for analytics
             AppDetection.reportToServer('/api/report').catch(err => {

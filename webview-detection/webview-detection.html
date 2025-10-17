@@ -6,9 +6,28 @@
     <title>WebView Detection Test</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0 auto;
+            padding: 20px;
+            max-width: 800px;
             line-height: 1.6;
+        }
+        header {
+            background-color: #007aff;
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        header h1 {
+            font-size: 1.6rem;
+            margin: 0 0 10px 0;
+        }
+        header p {
+            font-size: 0.9rem;
+            margin: 0;
         }
         .detection-results {
             margin-top: 20px;
@@ -30,7 +49,10 @@
     </style>
 </head>
 <body>
-    <h1>WebView Detection Test</h1>
+    <header>
+        <h1>WebView Detection</h1>
+        <p>Basic detection of WebView environments</p>
+    </header>
 
     <div class="detection-results">
         <h2>Results:</h2>
@@ -146,52 +168,46 @@
                 return 'None detected';
             }
 
+            // Function to detect the browser name
+            function detectBrowserName() {
+                const ua = navigator.userAgent;
+                let browserName;
+
+                if (ua.indexOf("Edge") > -1) {
+                    browserName = "Microsoft Edge (Legacy)";
+                } else if (ua.indexOf("Edg") > -1) {
+                    browserName = "Microsoft Edge (Chromium)";
+                } else if (ua.indexOf("OPR") > -1 || ua.indexOf("Opera") > -1) {
+                    browserName = "Opera";
+                } else if (ua.indexOf("Chrome") > -1) {
+                    browserName = "Chrome";
+                } else if (ua.indexOf("Safari") > -1) {
+                    browserName = "Safari";
+                } else if (ua.indexOf("Firefox") > -1) {
+                    browserName = "Firefox";
+                } else if (ua.indexOf("MSIE") > -1 || ua.indexOf("Trident") > -1) {
+                    browserName = "Internet Explorer";
+                } else if (ua.indexOf("UCBrowser") > -1) {
+                    browserName = "UC Browser";
+                } else if (ua.indexOf("Samsung") > -1) {
+                    browserName = "Samsung Browser";
+                } else {
+                    browserName = "Unknown Browser";
+                }
+
+                return browserName;
+            }
+
             addDetail('Specific app WebView', detectAppByUA());
 
             // 10. Detect WKWebView or UIWebView (iOS)
             const isWKWebView = /AppleWebKit\/[0-9.]+.*Safari\/[0-9.]+$/.test(userAgent) &&
-                               hasIOSUA &&
+                               isIOSUA &&
                                typeof window.webkit !== 'undefined';
-            const isUIWebView = hasIOSUA && !isWKWebView && !/Safari/i.test(userAgent);
+            const isUIWebView = isIOSUA && !isWKWebView && !/Safari/i.test(userAgent);
 
             addDetail('iOS WKWebView', isWKWebView);
             addDetail('iOS UIWebView (deprecated)', isUIWebView);
-
-            // Native browser detection
-            let isNativeBrowser = false;
-            let browserName = null;
-
-            // Check for Android native browsers
-            if (isAndroidUA && !(/wv/.test(userAgent))) {
-                isNativeBrowser = true;
-                if (/Chrome/.test(userAgent) && /Google Inc/.test(navigator.vendor) && !/Edg/.test(userAgent)) {
-                    browserName = 'Chrome';
-                } else if (/Firefox/.test(userAgent)) {
-                    browserName = 'Firefox';
-                } else if (/Edg/.test(userAgent)) {
-                    browserName = 'Edge';
-                } else if (/SamsungBrowser/.test(userAgent)) {
-                    browserName = 'Samsung';
-                } else if (/OPR|Opera/.test(userAgent)) {
-                    browserName = 'Opera';
-                }
-            }
-
-            // Check for iOS native browsers
-            if (isIOSUA && !isUIWebView && !isWKWebView) {
-                isNativeBrowser = true;
-                if (/CriOS/.test(userAgent)) {
-                    browserName = 'Chrome';
-                } else if (/FxiOS/.test(userAgent)) {
-                    browserName = 'Firefox';
-                } else if (/EdgiOS/.test(userAgent)) {
-                    browserName = 'Edge';
-                } else if (/OPiOS/.test(userAgent)) {
-                    browserName = 'Opera';
-                } else if (/Safari/.test(userAgent) && !(/Chrome|CriOS/.test(userAgent))) {
-                    browserName = 'Safari';
-                }
-            }
 
             // Make a determination
             const isInWebView = hasAndroidWebViewObj ||
@@ -203,17 +219,21 @@
 
             // Update UI with final determination
             if (isInWebView) {
-                resultEl.textContent = 'This page is running in a native app WebView component!';
-                statusEl.textContent = 'WebView Detected';
-                statusEl.style.color = '#2d8a2d';
-            } else if (isNativeBrowser) {
-                resultEl.textContent = browserName
-                    ? `You are browsing from the ${browserName} browser app`
-                    : 'You are browsing from a native browser app';
-                statusEl.textContent = browserName ? `${browserName} Browser` : 'Native Browser';
-                statusEl.style.color = '#db4437';
+                // Check if it's a browser's WebView like Facebook or Instagram
+                const detectedApp = detectAppByUA();
+                if (detectedApp !== 'None detected') {
+                    resultEl.textContent = 'You are browsing from: ' + detectedApp;
+                    statusEl.textContent = 'App Browser Detected';
+                    statusEl.style.color = '#2d8a2d';
+                } else {
+                    resultEl.textContent = 'You are browsing from a WebView';
+                    statusEl.textContent = 'WebView Detected';
+                    statusEl.style.color = '#2d8a2d';
+                }
             } else {
-                resultEl.textContent = 'This page appears to be running in a regular browser.';
+                // Identify the browser
+                const browserName = detectBrowserName();
+                resultEl.textContent = 'You are browsing from: ' + browserName;
                 statusEl.textContent = 'Regular Browser';
                 statusEl.style.color = '#0066cc';
             }

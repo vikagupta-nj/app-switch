@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Link Launcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        #delayInput {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100px;
+        }
+        #myIframe {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+        #isActiveLabel {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .active {
+            color: green;
+        }
+        .inactive {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Launch Your App</h1>
+
+<label for="delayInput">Delay (milliseconds):</label>
+<input type="number" id="delayInput" value="3000" min="0">
+
+<div id="isActiveLabel">isActive: <span id="isActiveValue"></span></div>
+
+<h2>Response Preview:</h2>
+<pre id="responsePreview">Waiting for response...</pre>
+<button id="userActionLaunch">Open App with user action</button>
+<button id="backgroundLaunch">Open App with Dynamic Delay</button>
+<button id="bridgeLaunch">Open App with Bridge Page</button>
+<button id="measureRtt">Measure RTT to PayPal</button>
+<button id="syncUserActionLaunch">Open App with Sync user action</button>
+
+<h2>RTT Results:</h2>
+<pre id="rttResults">RTT will be displayed here.</pre>
+
+<script src="app-detection.js"></script>
+<script>
+    // Function to update isActiveLabel
+    function updateIsActiveLabel() {
+        const isActive = navigator.userActivation.isActive;
+        const isActiveValueElement = document.getElementById('isActiveValue');
+        isActiveValueElement.textContent = isActive;
+        // Update the CSS class for styling
+        const isActiveLabel = document.getElementById('isActiveLabel');
+        if (isActive) {
+          isActiveLabel.classList.remove('inactive');
+          isActiveLabel.classList.add('active');
+        } else {
+          isActiveLabel.classList.remove('active');
+          isActiveLabel.classList.add('inactive');
+        }
+    }
+
+    // Update the label initially
+    updateIsActiveLabel();
+
+    // Update the label when a click event occurs
+    document.addEventListener('click', updateIsActiveLabel);
+
+    // Set an interval to update the label regularly (every 100ms)
+    setInterval(updateIsActiveLabel, 100);
+    // Existing buttons
+
+    document.getElementById('userActionLaunch').addEventListener('click', async function() {
+        const fetchDelay = parseInt(document.getElementById('delayInput').value, 10) / 1000;
+        if (isNaN(fetchDelay) || fetchDelay < 0) {
+            alert('Please enter a valid positive number for the delay.');
+            return;
+        }
+        //const perApiDelay = fetchDelay / 4;
+        try {
+            document.getElementById('responsePreview').textContent = "Starting fetches...";
+            // Using our AppDetection.fetchDelay method instead of httpbin
+            await AppDetection.fetchDelay(document.getElementById('delayInput').value);
+            document.getElementById('responsePreview').textContent = "All fetches finished. Opening the app...";
+            var ul = 'https://www.paypal.com/app-switch-checkout?token=5HS473908X025453&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
+            window.location.href = ul;
+        } catch (error) {
+            console.error('Error during fetch:', error);
+            document.getElementById('responsePreview').textContent = "Error during fetch";
+        }
+    });
+
+    document.getElementById('backgroundLaunch').addEventListener('click', function() {
+        const fetchDelay = parseInt(document.getElementById('delayInput').value, 10) / 1000;
+        if (isNaN(fetchDelay) || fetchDelay < 0) {
+            alert('Please enter a valid positive number for the delay.');
+            return;
+        }
+        // Using our AppDetection.fetchDelay method instead of httpbin
+        AppDetection.fetchDelay(document.getElementById('delayInput').value)
+            .then(response => {
+                document.getElementById('responsePreview').textContent = "Timer started";
+                const delay = parseInt(document.getElementById('delayInput').value, 10);
+                if (isNaN(delay) || delay < 0) {
+                    alert('Please enter a valid positive number for the delay.');
+                    return;
+                }
+                setTimeout(() => {
+                    document.getElementById('responsePreview').textContent = "data received: " + JSON.stringify(response);
+                    var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
+                    window.location.href = ul;
+                }, delay);
+            })
+            .catch(error => {
+                console.error('Error fetching with delay:', error);
+                document.getElementById('responsePreview').textContent = "Error: " + error.message;
+            });
+    });
+
+    document.getElementById('measureRtt').addEventListener('click', function() {
+        const startTime = performance.now();
+        // Cache-busting by adding a random query parameter
+        const cacheBuster = Math.random();
+        fetch(`https://api.paypal.com/?cacheBuster=${cacheBuster}`, { method: 'HEAD', mode: 'no-cors' })
+            .then(response => {
+                const endTime = performance.now();
+                const rtt = endTime - startTime;
+                // Because we're using mode: 'no-cors', the response is opaque.
+                // We cannot determine the real status code. It will always be 0.
+                // A status of 0 does NOT mean a network error. It just means we
+                // cannot know the real status due to no-cors.
+                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Status: ${response.status})`;
+            })
+            .catch(error => {
+                const rtt = performance.now() - startTime;
+                document.getElementById('rttResults').textContent = `RTT to PayPal: ${rtt.toFixed(2)} ms (Network Error)`;
+                console.error('Error fetching data:', error);
+            });
+    });
+
+    // New button: syncUserActionLaunch
+    document.getElementById('syncUserActionLaunch').addEventListener('click', function() {
+        const fetchDelay = parseInt(document.getElementById('delayInput').value, 10) / 1000;
+        if (isNaN(fetchDelay) || fetchDelay < 0) {
+            alert('Please enter a valid positive number for the delay.');
+            return;
+        }
+        document.getElementById('responsePreview').textContent = "Fetching synchronously...";
+
+        try {
+            const response = AppDetection.fetchDelaySync(document.getElementById('delayInput').value);
+            document.getElementById('responsePreview').textContent = "data received: " + JSON.stringify(response);
+            var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
+            window.location.href = ul;
+        } catch (error) {
+            console.error("Error during synchronous delay fetch:", error);
+            document.getElementById('responsePreview').textContent = `Error: ${error.message}`;
+        }
+
+    });
+
+    document.getElementById('bridgeLaunch').addEventListener('click', function() {
+        window.location.href = 'bridge.html';
+    })
+
+    /*
+    // Iframe related logic
+    const iframe = document.getElementById('myIframe');
+    const iframeContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Iframe Content</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                }
+                button {
+                    padding: 10px 20px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    border: none;
+                    background-color: #28a745;
+                    color: white;
+                    border-radius: 5px;
+                }
+            </style>
+        </head>
+        <body>
+            <h2>Iframe Content</h2>
+            <button id="iframeLaunch">Launch App from Iframe</button>
+            <script>
+                document.getElementById('iframeLaunch').addEventListener('click', function() {
+                    // Get fetchDelay from the parent
+                    const fetchDelay = parseInt(window.parent.document.getElementById('delayInput').value, 10)/1000;
+                     if (isNaN(fetchDelay) || fetchDelay < 0) {
+                       alert('Please enter a valid positive number for the delay.');
+                        return;
+                     }
+                    // Using our AppDetection.fetchDelay method instead of httpbin
+                    window.parent.AppDetection.fetchDelay(fetchDelay)
+                        .then(response => {
+                            var ul = 'https://www.paypal.com/app-switch-checkout?token=6X4078591K686073N&tokenType=ORDER_ID&buttonSessionID=uid_109931a52a_mje6mjy6mze&integration_type=web_sdk';
+                            // Send message to parent
+                            window.parent.postMessage({ action: 'launchApp', url: ul }, '*');
+                        })
+                        .catch(error => {
+                            console.error('Error fetching universal link:', error);
+                        });
+                });
+            <\/script>
+        </body>
+        </html>
+    `;
+
+    iframe.srcdoc = iframeContent;
+
+    // Listen for messages from the iframe
+    window.addEventListener('message', (event) => {
+        if (event.data.action === 'launchApp') {
+            window.location.href = event.data.url;
+        }
+    });
+    */
+</script>
+
+</body>
+</html>
