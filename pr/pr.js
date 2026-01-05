@@ -1,8 +1,9 @@
 /**
  * Initializes the payment request object.
+ * @param {string} amount - The payment amount
  * @return {PaymentRequest} The payment request object.
  */
-function buildPaymentRequest() {
+function buildPaymentRequest(amount = '0.01') {
   if (!window.PaymentRequest) {
     error('Payment Request API is not supported or not enabled.');
     return null;
@@ -22,7 +23,7 @@ function buildPaymentRequest() {
       label: 'Total',
       amount: {
         currency: 'USD',
-        value: '0.01',
+        value: amount,
       },
     },
   };
@@ -62,44 +63,52 @@ let request = buildPaymentRequest();
 
 /**
  * Handles the response from PaymentRequest.show().
+ * @param {string} amount - The payment amount
  */
-function handlePaymentResponse(response) {
+function handlePaymentResponse(response, amount = '0.01') {
     response.complete('success')
       .then(function() {
         dismissPageDimmer();
         info(JSON.stringify(response, undefined, 2));
-        request = buildPaymentRequest();
+        request = buildPaymentRequest(amount);
       })
       .catch(function(err) {
         dismissPageDimmer();
         error(err);
-        request = buildPaymentRequest();
+        request = buildPaymentRequest(amount);
       });
 }
 
 /**
  * Launches payment request for Bob Pay.
+ * @param {string} amount - The payment amount
  */
-function onBuyClicked() { // eslint-disable-line no-unused-vars
+function onBuyClicked(amount = '0.01') { // eslint-disable-line no-unused-vars
   if (!window.PaymentRequest || !request) {
     error('Payment Request API is not supported or not enabled.');
     return;
   }
 
+  // Rebuild request with the specified amount
+  request = buildPaymentRequest(amount);
+
   try {
     showPageDimmer();
     request.show()
-      .then(handlePaymentResponse)
+      .then(response => handlePaymentResponse(response, amount))
       .catch(function(err) {
         error(err);
-        request = buildPaymentRequest();
+        request = buildPaymentRequest(amount);
       });
   } catch (e) {
     error('Developer mistake: \'' + e.message + '\'');
-    request = buildPaymentRequest();
+    request = buildPaymentRequest(amount);
   }
 }
 
 function onReturnValueChanged() {
-  request = buildPaymentRequest();
+  // Get current amount from URL or use default
+  const urlParams = new URLSearchParams(window.location.search);
+  const amount = urlParams.get('amount') || '0.01';
+  request = buildPaymentRequest(amount);
 }

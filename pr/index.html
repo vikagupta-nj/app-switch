@@ -41,7 +41,14 @@
   <script src="pr.js"></script>
   <script src="redirect.js"></script>
   <script>
-    onBuyClicked()
+    // Get amount from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const amount = urlParams.get('amount') || '0.01';
+    
+    // Update the displayed price
+    document.querySelector('strong').textContent = `$${amount}`;
+    
+    onBuyClicked(amount);
   </script>
 </body>
 </html>
