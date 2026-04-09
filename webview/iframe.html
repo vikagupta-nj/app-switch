@@ -14,9 +14,61 @@
     </a>
   </p>
   <p>
-    <a href="paypal-app-switch-checkout://">
+    <a id="open-paypal-deeplink" href="paypal-app-switch-checkout://">
       Open PayPal via deep link scheme
     </a>
   </p>
+  <p>
+    <a id="open-paypal-window-location" href="#">
+      Open PayPal via window.location
+    </a>
+  </p>
+  <p id="status"></p>
+
+  <script>
+    const PAYPAL_DEEP_LINK = "paypal-app-switch-checkout://";
+    const status = document.getElementById("status");
+    const deepLink = document.getElementById("open-paypal-deeplink");
+    const windowLocationLink = document.getElementById("open-paypal-window-location");
+
+    function installLaunchSignals(onHidden) {
+      const handleVisibility = () => {
+        if (document.visibilityState === "hidden") {
+          onHidden();
+        }
+      };
+
+      document.addEventListener("visibilitychange", handleVisibility, { once: true });
+      window.addEventListener("pagehide", onHidden, { once: true });
+      window.addEventListener("blur", onHidden, { once: true });
+    }
+
+    function startVisibilityTimer(label) {
+      let appLaunchDetected = false;
+
+      status.textContent = `Trying ${label}...`;
+
+      installLaunchSignals(() => {
+        appLaunchDetected = true;
+        status.textContent = `${label}: page lost visibility. PayPal app may have opened.`;
+      });
+
+      window.setTimeout(() => {
+        if (!appLaunchDetected) {
+          status.textContent = `${label}: still visible after timeout. App likely did not open.`;
+        }
+      }, 1200);
+    }
+
+    deepLink.addEventListener("click", () => {
+      startVisibilityTimer("deep link");
+    });
+
+    windowLocationLink.addEventListener("click", (event) => {
+      event.preventDefault();
+      startVisibilityTimer("window.location");
+      window.location.href = PAYPAL_DEEP_LINK;
+    });
+  </script>
 </body>
 </html>
