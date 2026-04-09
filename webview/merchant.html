@@ -69,15 +69,24 @@
   <script>
     const popup = document.getElementById("checkout-popup");
     const iframe = document.getElementById("checkout-iframe");
+    const IFRAME_SRC = "https://vikagupta-nj.github.io/app-switch/webview/iframe.html";
+
+    // Restore popup if page was reloaded by WKWebView after backgrounding
+    if (sessionStorage.getItem("popupOpen")) {
+      popup.hidden = false;
+      iframe.src = IFRAME_SRC;
+    }
 
     document.getElementById("open-checkout").addEventListener("click", () => {
       popup.hidden = false;
-      iframe.src = "https://vikagupta-nj.github.io/app-switch/webview/iframe.html";
+      iframe.src = IFRAME_SRC;
+      sessionStorage.setItem("popupOpen", "1");
     });
 
     document.getElementById("close-checkout").addEventListener("click", () => {
       popup.hidden = true;
       iframe.src = "";
+      sessionStorage.removeItem("popupOpen");
     });
   </script>
 </body>
