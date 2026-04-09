@@ -4,6 +4,41 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Merchant POC</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 24px;
+    }
+
+    #checkout-popup[hidden] {
+      display: none;
+    }
+
+    #checkout-popup {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    #checkout-popup-content {
+      background: #fff;
+      width: min(90vw, 720px);
+      height: min(80vh, 700px);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    #checkout-iframe {
+      width: 100%;
+      height: calc(100% - 52px);
+      border: 1px solid #ccc;
+    }
+  </style>
 </head>
 <body>
   <h1>Merchant Page</h1>
@@ -16,19 +51,28 @@
     </a>
   </p>
 
-  <div id="checkout-container"></div>
+  <div id="checkout-popup" hidden>
+    <div id="checkout-popup-content">
+      <p><button id="close-checkout">Close checkout popup</button></p>
+      <iframe
+        id="checkout-iframe"
+        title="Checkout iframe"
+      ></iframe>
+    </div>
+  </div>
 
   <script>
-    document.getElementById("open-checkout").addEventListener("click", () => {
-      const iframe = document.createElement("iframe");
-      iframe.src = "https://vikagupta-nj.github.io/app-switch/webview/iframe.html";
-      iframe.width = "300";
-      iframe.height = "200";
-      iframe.setAttribute("title", "Checkout iframe");
+    const popup = document.getElementById("checkout-popup");
+    const iframe = document.getElementById("checkout-iframe");
 
-      const container = document.getElementById("checkout-container");
-      container.innerHTML = "";
-      container.appendChild(iframe);
+    document.getElementById("open-checkout").addEventListener("click", () => {
+      popup.hidden = false;
+      iframe.src = "https://vikagupta-nj.github.io/app-switch/webview/iframe.html";
+    });
+
+    document.getElementById("close-checkout").addEventListener("click", () => {
+      popup.hidden = true;
+      iframe.src = "";
     });
   </script>
 </body>
