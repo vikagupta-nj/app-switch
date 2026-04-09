@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Merchant POC</title>
+</head>
+<body>
+  <h1>Merchant Page</h1>
+  <p>
+    <button id="open-checkout">Open checkout iframe</button>
+  </p>
+  <p>
+    <a href="paypal-app-switch-checkout://">
+      Open PayPal via deep link scheme
+    </a>
+  </p>
+
+  <div id="checkout-container"></div>
+
+  <script>
+    document.getElementById("open-checkout").addEventListener("click", () => {
+      const iframe = document.createElement("iframe");
+      iframe.src = "https://vikagupta-nj.github.io/app-switch/webview/merchant.html";
+      iframe.width = "300";
+      iframe.height = "200";
+      iframe.setAttribute("title", "Checkout iframe");
+
+      const container = document.getElementById("checkout-container");
+      container.innerHTML = "";
+      container.appendChild(iframe);
+    });
+  </script>
+</body>
+</html>
