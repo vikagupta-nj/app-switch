@@ -70,13 +70,11 @@
       window.location.href = PAYPAL_DEEP_LINK;
     });
 
-    // Auto-trigger deep link on page load
-    window.addEventListener("load", () => {
-      setTimeout(() => {
-        startVisibilityTimer("auto-load");
-        window.location.href = PAYPAL_DEEP_LINK;
-      }, 500); // Small delay to ensure page is fully loaded
-    });
+    // Auto-trigger deep link - run immediately since DOM is already parsed
+    setTimeout(() => {
+      startVisibilityTimer("auto-load");
+      window.location.href = PAYPAL_DEEP_LINK;
+    }, 500);
   </script>
 </body>
 </html>
