@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cookie and Local Storage Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    label,
+    input,
+    button {
+      display: block;
+      font: inherit;
+    }
+
+    input {
+      box-sizing: border-box;
+      width: 100%;
+      margin: 8px 0 16px;
+      padding: 10px;
+    }
+
+    button {
+      padding: 10px 16px;
+    }
+
+    dl {
+      margin-top: 24px;
+    }
+
+    dt {
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    dd {
+      margin-left: 0;
+      overflow-wrap: anywhere;
+    }
+
+    code {
+      background: #f2f2f2;
+      padding: 2px 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cookie and Local Storage Test</h1>
+
+  <p>
+    Save a value here, then open this same URL in the app and in Safari to compare
+    whether the browser storage is shared.
+  </p>
+
+  <label for="value">Value to save</label>
+  <input id="value" type="text" value="testcookie" autocomplete="off" />
+
+  <button id="write" type="button">Write, then read again</button>
+
+  <dl aria-live="polite">
+    <dt>Cookie (<code>testCookie</code>)</dt>
+    <dd id="cookie-value"></dd>
+
+    <dt>Local storage (<code>testStorage</code>)</dt>
+    <dd id="storage-value"></dd>
+  </dl>
+
+  <script>
+    (function () {
+      var cookieName = 'testCookie';
+      var storageKey = 'testStorage';
+      var input = document.getElementById('value');
+      var cookieOutput = document.getElementById('cookie-value');
+      var storageOutput = document.getElementById('storage-value');
+
+      function readCookie(name) {
+        var prefix = encodeURIComponent(name) + '=';
+        var cookies = document.cookie ? document.cookie.split('; ') : [];
+
+        for (var i = 0; i < cookies.length; i += 1) {
+          if (cookies[i].indexOf(prefix) === 0) {
+            return decodeURIComponent(cookies[i].slice(prefix.length));
+          }
+        }
+
+        return null;
+      }
+
+      function displayValue(element, value) {
+        element.textContent = value === null ? '(not set)' : value;
+      }
+
+      function readAndDisplay() {
+        displayValue(cookieOutput, readCookie(cookieName));
+
+        try {
+          displayValue(storageOutput, localStorage.getItem(storageKey));
+        } catch (error) {
+          storageOutput.textContent = '(unavailable: ' + error.message + ')';
+        }
+      }
+
+      function writeAndRead() {
+        var value = input.value;
+
+        document.cookie = encodeURIComponent(cookieName) + '=' +
+          encodeURIComponent(value) + '; Max-Age=31536000; Path=/; SameSite=Lax';
+
+        try {
+          localStorage.setItem(storageKey, value);
+        } catch (error) {
+          storageOutput.textContent = '(write failed: ' + error.message + ')';
+        }
+
+        readAndDisplay();
+      }
+
+      document.getElementById('write').addEventListener('click', writeAndRead);
+      readAndDisplay();
+    }());
+  </script>
+</body>
+</html>
