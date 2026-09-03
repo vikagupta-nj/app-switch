@@ -24,7 +24,7 @@
     </a>
   </p>
   </p>
-    <a target="_top" href="https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228">
+    <a id="open-paypal-ul-top" target="_top" href="https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228">
       universal link on top window
     </a>
   </p>
@@ -40,6 +40,17 @@
     const status = document.getElementById("status");
     const deepLink = document.getElementById("open-paypal-deeplink");
     const windowLocationLink = document.getElementById("open-paypal-window-location");
+    const ulTopLink = document.getElementById("open-paypal-ul-top");
+    const PAYPAL_URL_TOP = "https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228";
+    let armedForTopNavigation = false;
+
+    // beforeunload only fires when the OS did NOT intercept the universal link, i.e. the app isn't installed and a real page navigation is starting
+    window.addEventListener("beforeunload", (event) => {
+      if (!armedForTopNavigation) return;
+      status.textContent = "universal link (top window): app not installed, blocked navigation.";
+      event.preventDefault();
+      event.returnValue = "";
+    });
 
     function installLaunchSignals(onHidden) {
       const handleVisibility = () => {
@@ -72,6 +83,15 @@
 
     deepLink.addEventListener("click", () => {
       startVisibilityTimer("deep link");
+    });
+
+    ulTopLink.addEventListener("click", (event) => {
+      event.preventDefault();
+      armedForTopNavigation = true;
+      startVisibilityTimer("universal link (top window)");
+      window.top.location.href = PAYPAL_URL_TOP;
+      // disarm once the app-switch window has passed so later, legitimate navigations aren't blocked
+      window.setTimeout(() => { armedForTopNavigation = false; }, 1200);
     });
 
     windowLocationLink.addEventListener("click", (event) => {

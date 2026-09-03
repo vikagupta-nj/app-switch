@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PayPal modal POC</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 16px;
+    }
+
+    button {
+      font-size: 16px;
+      padding: 12px 16px;
+      width: 100%;
+    }
+
+    dialog {
+      width: 90vw;
+      max-width: 400px;
+      border: none;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    dialog button {
+      margin-top: 12px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 80vh;
+      border: 1px solid #ccc;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <button id="open-modal">PayPal</button>
+
+  <dialog id="checkout-dialog">
+    <button id="checkout-app">Checkout in PayPal app</button>
+    <button id="checkout-app-smart">Checkout in PayPal app (with fallback)</button>
+    <p id="checkout-status" hidden></p>
+    <button id="enter-password">Enter password here</button>
+  </dialog>
+
+  <iframe id="checkout-iframe" title="Checkout" hidden></iframe>
+
+  <script>
+    const PAYPAL_URL = "https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228";
+    const dialog = document.getElementById("checkout-dialog");
+    const iframe = document.getElementById("checkout-iframe");
+
+    document.getElementById("open-modal").addEventListener("click", () => {
+      dialog.showModal();
+    });
+
+    document.getElementById("checkout-app").addEventListener("click", () => {
+      dialog.close();
+      window.location.href = PAYPAL_URL;
+    });
+
+    const DEEP_LINK_URL = "paypal-app-switch-checkout://";
+    const FAILURE_TIMEOUT_MS = 1500;
+    const smartButton = document.getElementById("checkout-app-smart");
+    const statusEl = document.getElementById("checkout-status");
+
+    smartButton.addEventListener("click", () => {
+      statusEl.hidden = true;
+      smartButton.disabled = true;
+
+      let appLaunchDetected = false;
+
+      // blur alone is unreliable: the iOS "Open in PayPal?" confirmation also steals focus without a real app switch
+      const onHidden = () => {
+        if (!document.hidden) return;
+        appLaunchDetected = true;
+        statusEl.textContent = "App switch success";
+        statusEl.hidden = false;
+        smartButton.disabled = false;
+      };
+
+      document.addEventListener("visibilitychange", onHidden);
+      window.addEventListener("pagehide", onHidden, { once: true });
+
+      window.location.href = DEEP_LINK_URL;
+
+      window.setTimeout(() => {
+        if (appLaunchDetected) return;
+        statusEl.textContent = "App switch failed. Please use \u201cEnter password here\u201d instead.";
+        statusEl.hidden = false;
+        smartButton.disabled = false;
+      }, FAILURE_TIMEOUT_MS);
+    });
+
+    document.getElementById("enter-password").addEventListener("click", () => {
+      dialog.close();
+      iframe.hidden = false;
+      iframe.src = PAYPAL_URL;
+    });
+  </script>
+</body>
+</html>

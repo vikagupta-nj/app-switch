@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deep link vs universal link</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 24px;
+    }
+
+    section {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    button, a.button {
+      display: block;
+      font-size: 16px;
+      padding: 12px 16px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 8px;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid #999;
+      border-radius: 6px;
+      background: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <p><a href="home.html">&larr; Back to home</a></p>
+  <h1>Deep link vs universal link</h1>
+
+  <section>
+    <h2>Deep link (custom scheme)</h2>
+    <p><code>paypal-app-switch-checkout://</code></p>
+    <button id="dl-window-open">window.open()</button>
+    <button id="dl-window-open-self">window.open(url, "_self")</button>
+    <button id="dl-location-href">window.location.href</button>
+    <a class="button" href="paypal-app-switch-checkout://">Hyperlink</a>
+  </section>
+
+  <section>
+    <h2>Universal link (https)</h2>
+    <p><code>https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228</code></p>
+    <button id="ul-window-open">window.open()</button>
+    <button id="ul-window-open-self">window.open(url, "_self")</button>
+    <button id="ul-location-href">window.location.href</button>
+    <a class="button" href="https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228">Hyperlink</a>
+  </section>
+
+  <script>
+    const DEEP_LINK_URL = "paypal-app-switch-checkout://";
+    const UNIVERSAL_LINK_URL = "https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228";
+
+    document.getElementById("dl-window-open").addEventListener("click", () => {
+      window.open(DEEP_LINK_URL);
+    });
+
+    // target="_self" navigates the current context, going through decidePolicyForNavigationAction instead of createWebViewWith
+    document.getElementById("dl-window-open-self").addEventListener("click", () => {
+      window.open(DEEP_LINK_URL, "_self");
+    });
+
+    document.getElementById("dl-location-href").addEventListener("click", () => {
+      window.location.href = DEEP_LINK_URL;
+    });
+
+    document.getElementById("ul-window-open").addEventListener("click", () => {
+      window.open(UNIVERSAL_LINK_URL);
+    });
+
+    document.getElementById("ul-window-open-self").addEventListener("click", () => {
+      window.open(UNIVERSAL_LINK_URL, "_self");
+    });
+
+    document.getElementById("ul-location-href").addEventListener("click", () => {
+      window.location.href = UNIVERSAL_LINK_URL;
+    });
+  </script>
+</body>
+</html>
