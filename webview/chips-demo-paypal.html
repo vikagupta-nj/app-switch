@@ -80,9 +80,21 @@
       document.getElementById(elementId).textContent = value === null ? "(not set)" : value;
     }
 
+    function setCookie(elementId, cookieString) {
+      try {
+        document.cookie = cookieString;
+        return true;
+      } catch (error) {
+        // surfaces WKWebView cookie-policy errors that would otherwise abort the handler silently
+        document.getElementById(elementId).textContent = "(blocked: " + error.message + ")";
+        return false;
+      }
+    }
+
     document.getElementById("regular-set").addEventListener("click", () => {
-      document.cookie = "user_id=" + randomId() + "; Path=/; Max-Age=31536000";
-      display("regular-value", readCookie("user_id"));
+      if (setCookie("regular-value", "user_id=" + randomId() + "; Path=/; Max-Age=31536000")) {
+        display("regular-value", readCookie("user_id"));
+      }
     });
 
     document.getElementById("regular-get").addEventListener("click", () => {
@@ -90,8 +102,9 @@
     });
 
     document.getElementById("chips-set").addEventListener("click", () => {
-      document.cookie = "user_id_chips=" + randomId() + "; Path=/; Max-Age=31536000; Secure; SameSite=None; Partitioned";
-      display("chips-value", readCookie("user_id_chips"));
+      if (setCookie("chips-value", "user_id_chips=" + randomId() + "; Path=/; Max-Age=31536000; Secure; SameSite=None; Partitioned")) {
+        display("chips-value", readCookie("user_id_chips"));
+      }
     });
 
     document.getElementById("chips-get").addEventListener("click", () => {
