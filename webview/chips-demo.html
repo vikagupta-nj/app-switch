@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CHIPS cookie demo</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 24px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 420px;
+      border: 1px solid #ccc;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Merchant-A: cookies in iframe (ITP vs CHIPS)</h1>
+  <p>
+    Buyer visits merchant-a, which embeds a PayPal iframe below. PayPal sets a
+    <code>user_id</code> cookie. On a later visit, Safari's Intelligent Tracking
+    Prevention blocks that regular third-party cookie, while a CHIPS
+    (<code>Partitioned</code>) cookie remains accessible.
+  </p>
+
+  <iframe id="paypal-iframe" title="PayPal (simulated)"></iframe>
+
+  <script>
+    const PAYPAL_IFRAME_SRC = "";
+
+    document.getElementById("paypal-iframe").src = PAYPAL_IFRAME_SRC;
+  </script>
+</body>
+</html>

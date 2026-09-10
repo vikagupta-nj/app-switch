@@ -40,24 +40,36 @@
   <section>
     <h2>Deep link (custom scheme)</h2>
     <p><code>paypal-app-switch-checkout://</code></p>
-    <button id="dl-window-open">window.open()</button>
-    <button id="dl-window-open-self">window.open(url, "_self")</button>
+    <button id="dl-window-open">window.open (new tab)</button>
+    <button id="dl-window-open-self">window.open (same tab)</button>
+    <button id="dl-window-open-top">window.open (top)</button>
     <button id="dl-location-href">window.location.href</button>
     <a class="button" href="paypal-app-switch-checkout://">Hyperlink</a>
+    <p>
+    <a href="intent://#Intent;package=com.google.android.youtube;scheme=https;end;">
+    Launch YouTube App
+</a>
+<a href="intent://://youtube.com;">
+   Open App (or Web Fallback)
+</a>
+  </p>
+  <p><em>Chrome browser app only — not Android WebView (throws ERR_UNKNOWN_URL_SCHEME there unless the host app's shouldOverrideUrlLoading intercepts it):</em></p>
+  <button id="dl-intent-launch">intent:// (handleIntentLaunch)</button>
   </section>
 
   <section>
     <h2>Universal link (https)</h2>
-    <p><code>https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228</code></p>
-    <button id="ul-window-open">window.open()</button>
-    <button id="ul-window-open-self">window.open(url, "_self")</button>
+    <p><code>https://www.paypal.com/paypalme/paypal</code></p>
+    <button id="ul-window-open">window.open (new tab)</button>
+    <button id="ul-window-open-self">window.open (same tab)</button>
+    <button id="ul-window-open-top">window.open (top)</button>
     <button id="ul-location-href">window.location.href</button>
-    <a class="button" href="https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228">Hyperlink</a>
+    <a class="button" href="https://www.paypal.com/paypalme/paypal">Hyperlink</a>
   </section>
 
   <script>
     const DEEP_LINK_URL = "paypal-app-switch-checkout://";
-    const UNIVERSAL_LINK_URL = "https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228";
+    const UNIVERSAL_LINK_URL = "https://www.paypal.com/paypalme/paypal";
 
     document.getElementById("dl-window-open").addEventListener("click", () => {
       window.open(DEEP_LINK_URL);
@@ -66,6 +78,10 @@
     // target="_self" navigates the current context, going through decidePolicyForNavigationAction instead of createWebViewWith
     document.getElementById("dl-window-open-self").addEventListener("click", () => {
       window.open(DEEP_LINK_URL, "_self");
+    });
+
+    document.getElementById("dl-window-open-top").addEventListener("click", () => {
+      window.open(DEEP_LINK_URL, "_top");
     });
 
     document.getElementById("dl-location-href").addEventListener("click", () => {
@@ -80,9 +96,21 @@
       window.open(UNIVERSAL_LINK_URL, "_self");
     });
 
+    document.getElementById("ul-window-open-top").addEventListener("click", () => {
+      window.open(UNIVERSAL_LINK_URL, "_top");
+    });
+
     document.getElementById("ul-location-href").addEventListener("click", () => {
       window.location.href = UNIVERSAL_LINK_URL;
     });
+
+    function handleIntentLaunch() {
+  const url = "https://www.paypal.com/paypalme/paypal";
+  const urlWithoutScheme = url.replace(/^https?:\/\//, '');
+  window.location.href = `intent://${urlWithoutScheme}#Intent;scheme=https;package=com.paypal.android.p2pmobile;end;`;
+}
+
+    document.getElementById("dl-intent-launch").addEventListener("click", handleIntentLaunch);
   </script>
 </body>
 </html>

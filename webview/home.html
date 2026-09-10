@@ -16,12 +16,16 @@
   </style>
 </head>
 <body>
+  <!-- Universal link previously used https://www.paypal.com/app-switch-checkout?ba_token=BA-0BB96931BX4549228 (AASA-valid, but its web fallback errors since it needs a live, non-expired ba_token). All pages now use https://www.paypal.com/paypalme/paypal instead (also AASA-valid; fallback is a normal PayPal page, not an error). -->
   <h1>WKWebView POCs</h1>
   <ul>
     <li><a href="modal.html">Modal (PayPal checkout dialog)</a></li>
     <li><a href="merchant.html">Merchant page</a></li>
     <li><a href="dl-vs-ul.html">Deep link vs universal link</a></li>
     <li><a href="dl-vs-ul-modal.html">Deep link vs universal link (in iframe modal)</a></li>
+    <li><a href="server.html">Server-side redirect app switch</a></li>
+    <li><a href="server-modal.html">Server-side redirect app switch (in iframe modal)</a></li>
+    <li><a href="chips-demo.html">Cookies in iframe: ITP vs CHIPS</a></li>
   </ul>
 </body>
 </html>

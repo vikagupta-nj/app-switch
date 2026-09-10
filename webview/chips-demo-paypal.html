@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PayPal (simulated) - CHIPS demo</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 16px;
+    }
+
+    section {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 16px;
+    }
+
+    .value {
+      font-family: monospace;
+      background: #f2f2f2;
+      padding: 2px 6px;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #555;
+    }
+
+    button {
+      padding: 6px 12px;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>PayPal (simulated)</h1>
+
+  <section>
+    <h2>Section 1: Regular cookie (<code>user_id</code>)</h2>
+    <p>Value: <span id="regular-value" class="value">(not read yet)</span></p>
+    <button id="regular-set">Set</button>
+    <button id="regular-get">Get</button>
+  </section>
+
+  <section>
+    <h2>Section 2: CHIPS cookie (<code>user_id_chips</code>)</h2>
+    <p>Value: <span id="chips-value" class="value">(not read yet)</span></p>
+    <button id="chips-set">Set</button>
+    <button id="chips-get">Get</button>
+    <!-- Partitioned cookies require Secure, so this only persists when the page itself is served over HTTPS -->
+    <p class="note">Requires this page to be served over HTTPS (e.g. GitHub Pages) to persist.</p>
+  </section>
+
+  <script>
+    function readCookie(name) {
+      const prefix = name + "=";
+      const cookies = document.cookie ? document.cookie.split("; ") : [];
+      for (const cookie of cookies) {
+        if (cookie.indexOf(prefix) === 0) {
+          return cookie.slice(prefix.length);
+        }
+      }
+      return null;
+    }
+
+    function randomId() {
+      return (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2));
+    }
+
+    function display(elementId, value) {
+      document.getElementById(elementId).textContent = value === null ? "(not set)" : value;
+    }
+
+    document.getElementById("regular-set").addEventListener("click", () => {
+      document.cookie = "user_id=" + randomId() + "; Path=/; Max-Age=31536000";
+      display("regular-value", readCookie("user_id"));
+    });
+
+    document.getElementById("regular-get").addEventListener("click", () => {
+      display("regular-value", readCookie("user_id"));
+    });
+
+    document.getElementById("chips-set").addEventListener("click", () => {
+      document.cookie = "user_id_chips=" + randomId() + "; Path=/; Max-Age=31536000; Secure; SameSite=None; Partitioned";
+      display("chips-value", readCookie("user_id_chips"));
+    });
+
+    document.getElementById("chips-get").addEventListener("click", () => {
+      display("chips-value", readCookie("user_id_chips"));
+    });
+
+    display("regular-value", readCookie("user_id"));
+    display("chips-value", readCookie("user_id_chips"));
+  </script>
+</body>
+</html>
