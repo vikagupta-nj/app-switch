@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>URL Open Test</title>
+</head>
+<body>
+  <input id="url" type="text" placeholder="Enter URL" style="width: 100%; padding: 12px;">
+
+  <br><br>
+
+  <a id="plainLink" href="#">open via plain a tag</a>
+
+  <br><br>
+
+  <button onclick="window.location.href = urlValue()">window.location.href</button>
+  <button onclick="window.open(urlValue(), '_self')">window.open _self</button>
+  <button onclick="window.open(urlValue(), '_top')">window.open _top</button>
+
+  <script>
+    const input = document.getElementById('url');
+    const plainLink = document.getElementById('plainLink');
+
+    function urlValue() {
+      return input.value.trim();
+    }
+
+    input.addEventListener('input', function () {
+      plainLink.href = urlValue() || '#';
+    });
+  </script>
+</body>
+</html>
